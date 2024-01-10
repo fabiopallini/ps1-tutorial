@@ -1,9 +1,9 @@
 .DS_Store
-src/*.EXE
-src/*.exe
-src/*.cpe
 *.vim
-bin/
+*.EXE
+*.exe
+*.cpe
+*.TOC
+*.IMG
+*.ISO
 tools/
-data/
-mkpsxiso/

@@ -1,0 +1,86 @@
+Define LicensePath C:\projects\tutorial\cdrom\
+Define LicenseFile licensee.dat
+
+Disc CDROMXA_PSX ;the disk format
+
+	CatalogNumber 0000000000000
+
+	LeadIn XA ;lead in track (track 0)
+		Empty 1000 ;defines the lead in size (min 150)
+		PostGap 150 ;required gap at end of the lead in
+	EndTrack ;end of the lead in track
+
+	Track XA ;start of the XA (data) track
+
+		Pause 150 ;required pause in first track after the lead in
+
+		Volume ISO9660 ;define ISO 9660 volume
+			
+			SystemArea [LicensePath][LicenseFile]
+			
+			PrimaryVolume ;start point of primary volume
+				SystemIdentifier "PLAYSTATION" ;required indetifier (do not change)
+				VolumeIdentifier "XA_DEMO" ;app specific identifiers (changeable)
+				VolumeSetIdentifier "XADEMO" ;app specific identifiers (changeable)
+				PublisherIdentifier "SCEE" ;app specific identifiers (changeable)
+				DataPreparerIdentifier "SONY" ;app specific identifiers (changeable)
+				ApplicationIdentifier "PLAYSTATION" ;required indetifier (do not change)
+				LPath ;path tables as specified for PlayStation
+				OptionalLpath
+				MPath
+				OptionalMpath
+
+				Hierarchy ;start point of root directory definition
+
+					XAFileAttributes  Form1 Audio
+					XAVideoAttributes ApplicationSpecific
+					XAAudioAttributes ADPCM_C Stereo ;you can also add 'Emphasis_On' before Stereo
+
+					File SYSTEM.CNF
+						XAFileAttributes Form1 Data ;set the attribute to form 1
+						Source c:\projects\tutorial\cdrom\system.cnf ;where the file above can be found
+					EndFile
+
+					File MAIN.EXE 
+						XAFileAttributes Form1 Data
+						Source c:\projects\tutorial\src\MAIN.EXE
+					EndFile
+
+					File PLAYER1.TIM
+						XAFileAttributes Form1 Data
+						Source c:\projects\tutorial\data\PLAYER1.TIM
+					EndFile
+
+					;Directory XA ;make a new directory called XA and put the files below in it
+						;File FINAL.XA
+							;XAFileAttributes Form2 Data
+							;XASource c:\psyq\projects\xasample\data\xa\final.xa
+						;EndFile
+						;File TEST2.XA
+							;XAFileAttributes Form2 Data
+							;XASource c:\psyq\projects\xasample\test2.xa
+						;EndFile
+					;EndDirectory ;close the directory
+
+				EndHierarchy ;ends the root directory definition
+
+			EndPrimaryVolume ;ends the primary volume definition 
+
+		EndVolume ;ends the ISO 9660 definition
+
+		Empty 300
+		PostGap 150 ;required to change the track type
+	
+	EndTrack ;ends the track definition (end of the xa track)
+
+	;place as many audio tracks as you wish, but you must change the lead out to AUDIO instead of XA!
+	;Track AUDIO
+		;Pause 150
+		;Source  c:\psyq\music\justin-bieber.raw ;raw cd-da audio
+	;EndTrack
+
+	LeadOut XA ;note that the leadout track must be the same data type as the last track (IE: AUDIO, XA or MODE1)
+		Empty 150
+	EndTrack
+
+EndDisc

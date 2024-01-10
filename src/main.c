@@ -12,7 +12,7 @@ int main() {
 	sprite_init(&sprite, 41*2, 46*2, cd_data);
 	sprite_set_uv(&sprite, 0, 0, 41, 46);
 	sprite.pos.vx = 50;
-	sprite.pos.vy = 50;
+	sprite.pos.vy = 50; 
 
 	camera.pos.vx = 0;
 	camera.pos.vz = 2300;
