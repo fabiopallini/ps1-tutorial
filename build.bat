@@ -1,2 +1,2 @@
 dosbox -conf dos-build.conf
-mkpsxiso.bat
+mkpsxiso\mkpsxiso.exe -o game.iso -y cuesheet.xml

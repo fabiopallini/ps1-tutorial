@@ -1,1 +1,0 @@
-mkpsxiso\mkpsxiso.exe -o game.iso -y cuesheet.xml
