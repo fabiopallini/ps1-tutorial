@@ -1,7 +1,7 @@
 .DS_Store
 *.vim
-*.EXE
-*.exe
+src/*.EXE
+src/*.exe
 *.cpe
 *.TOC
 *.IMG
