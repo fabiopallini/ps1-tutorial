@@ -6,3 +6,5 @@ src/*.exe
 *.TOC
 *.IMG
 *.ISO
+*.cue
+*.iso
