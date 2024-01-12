@@ -1,0 +1,13 @@
+<?xml version="1.0" encoding="UTF-8"?>
+
+<iso_project image_name="game.bin" cue_sheet="game.cue" no_xa="1">
+	<track type="data">
+		<license file="..\tools\mkpsxiso\LICENSEE.DAT"/>
+		<directory_tree>
+			<file name="SYSTEM.CNF"	type="data" source="..\tools\mkpsxiso\SYSTEM.CNF"/>
+			<file name="MAIN.EXE" type="data" source="MAIN.EXE"/>
+			<file name="PLAYER1.TIM" type="data" source="..\data\PLAYER1.TIM"/>
+			<dummy sectors="1024"/>
+		</directory_tree>
+	</track>
+</iso_project>
