@@ -58,7 +58,24 @@ void sprite_init_rgb(Sprite *sprite, int w, int h){
 }
 
 void sprite_set_uv(Sprite *sprite, int x, int y, int w, int h){
-	setUV4(&sprite->poly, x, y, x+w, y, x, y+h, x+w, y+h);
+	if(sprite->direction == 1){
+		setUV4(
+			&sprite->poly, 
+			x, y, 
+			x+w, y, 
+			x, y+h, 
+			x+w, y+h
+		);
+	}
+	else {
+		setUV4(
+			&sprite->poly, 
+			x+w, y, 
+			x, y, 
+			x+w, y+h, 
+			x, y+h
+		);
+	}
 }
 
 void sprite_set_rgb(Sprite *sprite, u_char r, u_char g, u_char b) {
@@ -67,8 +84,9 @@ void sprite_set_rgb(Sprite *sprite, u_char r, u_char g, u_char b) {
 
 short sprite_anim(Sprite *sprite, short w, short h, short row, short firstFrame, short frames){
 	short result = 1;
-	if(sprite->frame < firstFrame){
+	if(sprite->frame < firstFrame || sprite->prevRow != row){
 		sprite->prevFrame = -1;
+		sprite->prevRow = row;
 		sprite->frame = firstFrame;
 	}
 

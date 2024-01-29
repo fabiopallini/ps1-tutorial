@@ -11,6 +11,7 @@ int main() {
 
 	sprite_init(&sprite, 41, 46, cd_data);
 	sprite_set_uv(&sprite, 41, 0, 41, 46);
+	sprite.direction = 1;
 	sprite.pos.vx = 50;
 	sprite.pos.vy = 50; 
 
