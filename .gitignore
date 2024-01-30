@@ -1,5 +1,6 @@
 .DS_Store
 *.vim
+*.sh
 src/*.EXE
 src/*.exe
 *.cpe
