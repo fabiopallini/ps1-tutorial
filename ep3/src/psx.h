@@ -39,32 +39,19 @@ typedef struct {
 
 Camera camera;
 
-typedef struct SpriteNode {
-	Sprite *data;
-	struct SpriteNode *next;
-} SpriteNode;
-
-typedef struct {
-	SpriteNode *spriteNode;
-} Scene;
-
-Scene scene;
 u_long pad, opad;
-long font_id[2];
 
 void psSetup();
 void psClear();
 void psExit();
 void psGte(VECTOR pos, SVECTOR *ang);
 void psDisplay();
-void psAddPrimF4(POLY_F4 *poly);
-void psAddPrimFT4(POLY_FT4 *poly);
-void psAddPrimFT4otz(POLY_FT4 *poly, long otz);
 void cd_open();
 void cd_close();
 void cd_read_file(unsigned char* file_path, u_long** file);
 void drawSprite(Sprite *sprite);
 void drawSprite_2d(Sprite *sprite);
 void drawSprite_2d_rgb(Sprite *sprite);
+void drawSprt(DR_MODE *dr_mode, SPRT *sprt);
 
 #endif

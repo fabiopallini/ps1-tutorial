@@ -14,4 +14,3 @@ all:
 	del QSHEET.TOC
 	del main.exe
 	del ..\cdrom\TEMP.IMG 
-
