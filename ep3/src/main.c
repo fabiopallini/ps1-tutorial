@@ -57,7 +57,7 @@ int main() {
 	}
 
 
-	for(i = 0; i <= 5; i++){
+	for(i = 0; i < 5; i++){
 		block_init(&blocks[i]);
 		setXY0(&blocks[i].sprt, 20+(20*i), 100);
 	}
