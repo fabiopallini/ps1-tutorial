@@ -11,15 +11,14 @@ typedef struct {
 	SPRT sprt;
 } BLOCK;
 BLOCK blocks[5];
-// 13x7
 
 void sprt_init(DR_MODE *dr_mode, SPRT *sprt){
 	SetDrawMode(dr_mode, 0, 0, GetTPage(2, 0, 768, 0), 0);
 	SetSprt(sprt);
 	sprt->u0 = 0; 
 	sprt->v0 = 0;
-	sprt->w = 41; 
-	sprt->h = 46;
+	sprt->w = 14; 
+	sprt->h = 7;
 	setRGB0(sprt, 255, 255, 255);
 	setXY0(sprt, 20, 20);
 }
@@ -29,8 +28,8 @@ void block_init(BLOCK *b){
 	SetSprt(&b->sprt);
 	b->sprt.u0 = 0; 
 	b->sprt.v0 = 0;
-	b->sprt.w = 32; 
-	b->sprt.h = 32;
+	b->sprt.w = 14; 
+	b->sprt.h = 7;
 	setRGB0(&b->sprt, 255, 255, 255);
 }
 
@@ -56,10 +55,9 @@ int main() {
 		player[i].pos.vy = 190; 
 	}
 
-
 	for(i = 0; i < 5; i++){
 		block_init(&blocks[i]);
-		setXY0(&blocks[i].sprt, 20+(20*i), 100);
+		setXY0(&blocks[i].sprt, 20+(15*i), 100);
 	}
 
 	while(1) {
@@ -94,7 +92,7 @@ int main() {
 			sprite_anim(&player[1], 41, 46, 0, 0, 6);
 			player[1].pos.vx -= 2;
 		}
-		if(pad2  & PADLright){
+		if(pad2 & PADLright){
 			player[1].direction = 1;
 			sprite_anim(&player[1], 41, 46, 0, 0, 6);
 			player[1].pos.vx += 2;
