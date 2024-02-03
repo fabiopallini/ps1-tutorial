@@ -155,6 +155,29 @@ void cd_read_file(unsigned char* file_path, u_long** file) {
 	free3(temp_file_info);
 }
 
+void loadToVRAM(u_long *image){
+	RECT rect;
+	GsIMAGE tim;
+	// skip the TIM ID and version (magic) by adding 0x4 to the pointer
+	/* 
+ 		image+4 if passing u_char*, image+1 if passing u_long*
+		u_char == 1 byte, u_long == 4 byte
+	*/
+	GsGetTimInfo(image+1, &tim);
+	// Load pattern into VRAM
+	rect.x = tim.px;
+	rect.y = tim.py;
+	rect.w = tim.pw;
+	rect.h = tim.ph;
+	LoadImage(&rect, tim.pixel);
+	// Load CLUT into VRAM
+	rect.x = tim.cx;
+	rect.y = tim.cy;
+	rect.w = tim.cw;
+	rect.h = tim.ch;
+	LoadImage(&rect, tim.clut);
+}
+
 void drawSprite(Sprite *sprite){
 	long otz;
 	setVector(&sprite->vector[0], -sprite->w, -sprite->h, 0);
