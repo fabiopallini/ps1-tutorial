@@ -155,7 +155,7 @@ void cd_read_file(unsigned char* file_path, u_long** file) {
 	free3(temp_file_info);
 }
 
-void loadToVRAM(u_long *image){
+u_short loadToVRAM(u_long *image){
 	RECT rect;
 	GsIMAGE tim;
 	// skip the TIM ID and version (magic) by adding 0x4 to the pointer
@@ -176,6 +176,7 @@ void loadToVRAM(u_long *image){
 	rect.w = tim.cw;
 	rect.h = tim.ch;
 	LoadImage(&rect, tim.clut);
+	return GetTPage(tim.pmode, 1, tim.px, tim.py);
 }
 
 void drawSprite(Sprite *sprite){

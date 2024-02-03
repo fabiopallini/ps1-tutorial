@@ -50,7 +50,7 @@ void cd_open();
 void cd_close();
 void cd_read_file(unsigned char* file_path, u_long** file);
 void drawSprite(Sprite *sprite);
-void loadToVRAM(u_long *image);
+u_short loadToVRAM(u_long *image);
 void drawSprite_2d(Sprite *sprite);
 void drawSprite_2d_rgb(Sprite *sprite);
 void drawSprt(DR_MODE *dr_mode, SPRT *sprt);

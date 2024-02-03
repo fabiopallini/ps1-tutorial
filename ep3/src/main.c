@@ -1,6 +1,7 @@
 #include "psx.h"
 
 u_long *cd_data[2];
+u_short tpages[2];
 Sprite player[2];
 DR_MODE dr_mode;
 SPRT sprt;
@@ -9,7 +10,7 @@ typedef struct {
 	DR_MODE dr_mode;
 	SPRT sprt;
 } BLOCK;
-BLOCK blocks[2];
+BLOCK blocks[5];
 // 13x7
 
 void sprt_init(DR_MODE *dr_mode, SPRT *sprt){
@@ -41,22 +42,28 @@ int main() {
 	cd_read_file("GFX1.TIM", &cd_data[1]);
 	cd_close();
 	
-	loadToVRAM(cd_data[1]);
+	tpages[0] = loadToVRAM(cd_data[0]);
+	tpages[1] = loadToVRAM(cd_data[1]);
 	//free3(cd_data);
 
 	sprt_init(&dr_mode, &sprt);
-	block_init(&blocks[0]);
-	setXY0(&blocks[0].sprt, 50, 50);
 
 	for(i = 0; i <= 1; i++){
-		sprite_init(&player[i], 41, 46, cd_data[0]);
+		sprite_init(&player[i], 41, 46, tpages[0]);
 		player[i].direction = 1;
 		sprite_set_uv(&player[i], 41, 0, 41, 46);
 		player[i].pos.vx = 20;
 		player[i].pos.vy = 190; 
 	}
 
+
+	for(i = 0; i <= 5; i++){
+		block_init(&blocks[i]);
+		setXY0(&blocks[i].sprt, 20+(20*i), 100);
+	}
+
 	while(1) {
+		int i = 0;
 		psClear();
 
 		// PLAYER 1 INPUT
@@ -102,7 +109,8 @@ int main() {
 		drawSprite_2d(&player[1]);
 
 		drawSprt(&dr_mode, &sprt);
-		drawSprt(&blocks[0].dr_mode, &blocks[0].sprt);
+		for(i = 0; i < 5; i++)
+			drawSprt(&blocks[i].dr_mode, &blocks[i].sprt);
 
 		psDisplay();
 	}
