@@ -64,6 +64,7 @@ void psClear(){
 	//ClearOTag(ot, OTSIZE);
 	ClearOTagR(ot, OTSIZE);
 	pad = PadRead(0);
+	pad2 = pad >> 16;
 
 	RotMatrix(&camera.rot, &camera.mtx);
 	ApplyMatrixLV(&camera.mtx, &camera.pos, &camera.tmp);	
