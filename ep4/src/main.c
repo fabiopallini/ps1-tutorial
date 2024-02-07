@@ -1,7 +1,5 @@
 #include "psx.h"
 
-#define GROUND_POS 180
-
 u_long *cd_data[2];
 u_short tpages[2];
 Sprite player[2];
@@ -54,7 +52,7 @@ int main() {
 		player[i].direction = 1;
 		sprite_set_uv(&player[i], 41, 0, 41, 46);
 		player[i].pos.vx = 20;
-		player[i].pos.vy = GROUND_POS; 
+		player[i].pos.vy = SCREEN_HEIGHT - player[i].h; 
 	}
 
 	for(i = 0; i < 5; i++){

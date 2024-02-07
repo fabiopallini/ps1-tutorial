@@ -20,7 +20,7 @@ void sprt_init(DR_MODE *dr_mode, SPRT *sprt){
 	sprt->w = 14; 
 	sprt->h = 7;
 	setRGB0(sprt, 255, 255, 255);
-	setXY0(sprt, 20, 35);
+	setXY0(sprt, 20, 20);
 }
 
 void block_init(BLOCK *b){
@@ -52,7 +52,7 @@ int main() {
 		player[i].direction = 1;
 		sprite_set_uv(&player[i], 41, 0, 41, 46);
 		player[i].pos.vx = 20;
-		player[i].pos.vy = 190; 
+		player[i].pos.vy = SCREEN_HEIGHT - player[i].h; 
 	}
 
 	for(i = 0; i < 5; i++){

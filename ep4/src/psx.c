@@ -28,6 +28,19 @@ void psSetup()
 	SetDefDrawEnv(&drawenv[1], 0, SCREEN_HEIGHT, SCREEN_WIDTH, SCREEN_HEIGHT);
 	SetDefDispEnv(&dispenv[0], 0, SCREEN_HEIGHT,SCREEN_WIDTH, SCREEN_HEIGHT);
 	SetDefDispEnv(&dispenv[1], 0, 0, SCREEN_WIDTH, SCREEN_HEIGHT);
+
+	#ifdef PAL
+		dispenv[0].screen.x = 0;
+		dispenv[0].screen.y = 16;
+		dispenv[0].screen.w = 256;
+		dispenv[0].screen.h = 256;
+
+		dispenv[1].screen.x = 0;
+		dispenv[1].screen.y = 16;
+		dispenv[1].screen.w = 256;
+		dispenv[1].screen.h = 256;
+	#endif
+
 	SetDispMask(1);
 
 	drawenv[0].isbg = 1;
@@ -38,7 +51,7 @@ void psSetup()
 	// load the font from the BIOS into the framebuffer
 	FntLoad(960, 256);
 	// screen X,Y | max text length X,Y | autmatic background clear 0,1 | max characters
-	SetDumpFnt(FntOpen(5, 10, SCREEN_WIDTH, SCREEN_HEIGHT, 0, 512));
+	SetDumpFnt(FntOpen(5, 5, SCREEN_WIDTH, SCREEN_HEIGHT, 0, 512));
 
 	//init stack 16KB heap 2 megabyte
 	InitHeap3((void*)0x800F8000, 0x00200000);
