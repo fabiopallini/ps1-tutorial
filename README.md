@@ -8,3 +8,4 @@ ep5 per l'episodio 5 e così via...
 ### lista episodi ###
 - [Episodio 1](https://youtu.be/i6VDCKHl7Ww?si=brdGsHSPQMW6e3AA)
 - [Episodio 2](https://youtu.be/gHbKUo3rB9I?si=pTeum24nzXGasc_X)
+- [Episodio 3](https://youtu.be/jyC9cKJZEcM)
