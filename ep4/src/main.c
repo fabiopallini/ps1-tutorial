@@ -1,8 +1,6 @@
 #include "psx.h"
 
 #define n_blocks 55
-#define block_x 15 
-#define block_y 48
 
 u_long *cd_data[2];
 u_short tpages[2];
@@ -41,43 +39,75 @@ int main() {
 	//free3(cd_data);
 
 	for(i = 0; i < n_blocks; i++){
+		int x = 0;
+		int y = 0;
+		int block_y = 48;
 		block_init(&blocks[i]);
-		if(i <= 3)
-			setXY0(&blocks[i].sprt, 40+(15*i), block_y*1);
-		if(i > 3 && i <= 7)
-			setXY0(&blocks[i].sprt, SCREEN_WIDTH-(15*i), block_y*1);
 
-		if(i > 7 && i <= 13)
-			setXY0(&blocks[i].sprt, 10+(15*k++), block_y*2);
-		if(i > 13 && i <= 17)
-			setXY0(&blocks[i].sprt, 40+(15*k++), block_y*2);
-		if(i > 17 && i <= 21)
-			setXY0(&blocks[i].sprt, 65+(15*k++), block_y*2);
+		if(i <= 3){
+			x = 40+(15*i); 
+			y = block_y*1;
+		}
+		if(i > 3 && i <= 7){
+			x = SCREEN_WIDTH-(15*i); 
+			y = block_y*1;
+		}
+
+		if(i > 7 && i <= 13){
+			x = 10+(15*k++);
+			y = block_y*2;
+		}
+		if(i > 13 && i <= 17){
+			x = 40+(15*k++); 
+			y = block_y*2;
+		}
+		if(i > 17 && i <= 21){
+			x = 65+(15*k++); 
+			y = block_y*2;
+		}
 
 		if(i == 22)
 			k = 0;
-		if(i > 21 && i <= 28)
-			setXY0(&blocks[i].sprt, 25+(15*k++), block_y*3);
-		if(i > 28 && i <= 32)
-			setXY0(&blocks[i].sprt, 45+(15*k++), block_y*3);
+		if(i > 21 && i <= 28){
+			x = 25+(15*k++); 
+			y = block_y*3;
+		}
+		if(i > 28 && i <= 32){
+			x = 45+(15*k++); 
+			y = block_y*3;
+		}
 
 		if(i == 33)
 			k = 0;
-		if(i > 32 && i <= 35)
-			setXY0(&blocks[i].sprt, 15+(15*k++), block_y*4);
-		if(i > 35 && i <= 37)
-			setXY0(&blocks[i].sprt, 35+(15*k++), block_y*4);
-		if(i > 37 && i <= 43)
-			setXY0(&blocks[i].sprt, 55+(15*k++), block_y*4);
-		if(i > 43 && i <= 46)
-			setXY0(&blocks[i].sprt, 75+(15*k++), block_y*4);
+		if(i > 32 && i <= 35){
+			x = 15+(15*k++); 
+			y = block_y*4;
+		}
+		if(i > 35 && i <= 37){
+			x = 35+(15*k++);
+		 	y = block_y*4;
+		}
+		if(i > 37 && i <= 43){
+			x = 55+(15*k++); 
+			y =  block_y*4;
+		}
+		if(i > 43 && i <= 46){
+			x = 75+(15*k++);
+			y = block_y*4;
+		}
 
 		if(i == 47)
 			k = 0;
-		if(i > 46 && i <= 50)
-			setXY0(&blocks[i].sprt, 35+(15*k++), block_y*5);
-		if(i > 50 && i <= 54)
-			setXY0(&blocks[i].sprt, SCREEN_WIDTH-(15*k++), block_y*5);
+		if(i > 46 && i <= 50){
+			x = 35+(15*k++);
+			y = block_y*5;
+		}
+		if(i > 50 && i <= 54){
+			x = SCREEN_WIDTH-(15*k++);
+			y = block_y*5;
+		}
+		
+		setXY0(&blocks[i].sprt, x, y);
 	}
 
 	for(i = 0; i <= 1; i++){
