@@ -1,6 +1,8 @@
 #include "psx.h"
 
-#define n_blocks 41 
+#define n_blocks 55
+#define block_x 15 
+#define block_y 48
 
 u_long *cd_data[2];
 u_short tpages[2];
@@ -38,43 +40,54 @@ int main() {
 	tpages[1] = loadToVRAM(cd_data[1]);
 	//free3(cd_data);
 
-	for(i = 0; i <= 1; i++){
-		sprite_init(&player[i], 31, 36, tpages[0]);
-		player[i].direction = 1;
-		sprite_set_uv(&player[i], 41, 0, 41, 46);
-		player[i].pos.vy = -50;
-	}
-	player[0].pos.vx = 35;
-	player[1].pos.vx = SCREEN_WIDTH - 100; 
-
 	for(i = 0; i < n_blocks; i++){
 		block_init(&blocks[i]);
 		if(i <= 3)
-			setXY0(&blocks[i].sprt, 40+(15*i), 50*1);
+			setXY0(&blocks[i].sprt, 40+(15*i), block_y*1);
 		if(i > 3 && i <= 7)
-			setXY0(&blocks[i].sprt, SCREEN_WIDTH-(15*i), 50*1);
+			setXY0(&blocks[i].sprt, SCREEN_WIDTH-(15*i), block_y*1);
 
 		if(i > 7 && i <= 13)
-			setXY0(&blocks[i].sprt, 10+(15*k++), 50*2);
+			setXY0(&blocks[i].sprt, 10+(15*k++), block_y*2);
 		if(i > 13 && i <= 17)
-			setXY0(&blocks[i].sprt, 40+(15*k++), 50*2);
+			setXY0(&blocks[i].sprt, 40+(15*k++), block_y*2);
 		if(i > 17 && i <= 21)
-			setXY0(&blocks[i].sprt, 65+(15*k++), 50*2);
+			setXY0(&blocks[i].sprt, 65+(15*k++), block_y*2);
 
 		if(i == 22)
 			k = 0;
 		if(i > 21 && i <= 28)
-			setXY0(&blocks[i].sprt, 25+(15*k++), 50*3);
+			setXY0(&blocks[i].sprt, 25+(15*k++), block_y*3);
 		if(i > 28 && i <= 32)
-			setXY0(&blocks[i].sprt, 45+(15*k++), 50*3);
+			setXY0(&blocks[i].sprt, 45+(15*k++), block_y*3);
 
 		if(i == 33)
 			k = 0;
-		if(i > 32 && i <= 36)
-			setXY0(&blocks[i].sprt, 35+(15*k++), 50*5);
-		if(i > 36 && i <= 40)
-			setXY0(&blocks[i].sprt, SCREEN_WIDTH-(15*k++), 50*5);
+		if(i > 32 && i <= 35)
+			setXY0(&blocks[i].sprt, 15+(15*k++), block_y*4);
+		if(i > 35 && i <= 37)
+			setXY0(&blocks[i].sprt, 35+(15*k++), block_y*4);
+		if(i > 37 && i <= 43)
+			setXY0(&blocks[i].sprt, 55+(15*k++), block_y*4);
+		if(i > 43 && i <= 46)
+			setXY0(&blocks[i].sprt, 75+(15*k++), block_y*4);
+
+		if(i == 47)
+			k = 0;
+		if(i > 46 && i <= 50)
+			setXY0(&blocks[i].sprt, 35+(15*k++), block_y*5);
+		if(i > 50 && i <= 54)
+			setXY0(&blocks[i].sprt, SCREEN_WIDTH-(15*k++), block_y*5);
 	}
+
+	for(i = 0; i <= 1; i++){
+		sprite_init(&player[i], 31, 36, tpages[0]);
+		player[i].direction = 1;
+		sprite_set_uv(&player[i], 41, 0, 41, 46);
+		player[i].pos.vy = blocks[n_blocks-1].sprt.y0-player[i].h-10;
+	}
+	player[0].pos.vx = 35;
+	player[1].pos.vx = SCREEN_WIDTH - 100; 
 
 	while(1) {
 		int i = 0;
