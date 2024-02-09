@@ -6,12 +6,19 @@ u_long *cd_data[2];
 u_short tpages[2];
 Sprite player[2];
 char fall[2];
+char onRod[2];
 
 typedef struct {
 	DR_MODE dr_mode;
 	SPRT sprt;
 } BLOCK;
 BLOCK blocks[n_blocks];
+
+typedef struct {
+	DR_MODE dr_mode;
+	SPRT sprt;
+} ROD;
+ROD rods[5];
 
 void gravity(Sprite *s, int n);
 
@@ -101,6 +108,17 @@ void init_map() {
 	}
 }
 
+void init_rod(ROD *r) {
+	SetDrawMode(&r->dr_mode, 0, 0, GetTPage(2, 0, 768, 0), 0);
+	SetSprt(&r->sprt);
+	r->sprt.u0 = 0; 
+	r->sprt.v0 = 0;
+	//r->sprt.w = 2; 
+	r->sprt.w = 13; 
+	r->sprt.h = 16;
+	setRGB0(&r->sprt, 255, 255, 255);
+}
+
 void init_players() {
 	int i;
 	for(i = 0; i <= 1; i++){
@@ -111,6 +129,14 @@ void init_players() {
 	}
 	player[0].pos.vx = 35;
 	player[1].pos.vx = SCREEN_WIDTH - 100; 
+}
+
+void init_rods() {
+	int i;
+	for(i = 0; i < 5; i++){
+		init_rod(&rods[i]);
+		setXY0(&rods[i].sprt, 50, (SCREEN_HEIGHT-20)-(i*16));
+	}
 }
 
 int main() {
@@ -126,6 +152,7 @@ int main() {
 	
 	init_map();
 	init_players();
+	init_rods();
 
 	while(1) {
 		int i = 0;
@@ -135,7 +162,7 @@ int main() {
 		gravity(&player[1], 1);
 
 		// PLAYER 1 INPUT
-		if(fall[0] == 0) {
+		if(fall[0] == 0 && onRod[0] == 0) {
 			if((pad & PADLleft) == 0 && (pad & PADLright) == 0)
 				sprite_set_uv(&player[0], 0, 46*1, 41, 46);
 				
@@ -154,8 +181,23 @@ int main() {
 			if(player[0].pos.vx > SCREEN_WIDTH)	
 				player[0].pos.vx = 0;
 		}
+		if(onRod[0]) {
+			if(pad & PADLup)
+				player[0].pos.vy -= 2;
+			if(pad & PADLdown)
+				player[0].pos.vy += 2;
+			if(pad & PADLleft) {
+				player[0].pos.vx -= 2;
+				onRod[0] = 0;
+			}
+			if(pad & PADLright) {
+				player[0].pos.vx += 2;
+				onRod[0] = 0;
+			}
+				
+		}
 		// PLAYER 2 INPUT
-		if(fall[1] == 0) {
+		if(fall[1] == 0 && onRod[1] == 0) {
 			if((pad2 & PADLleft) == 0 && (pad2 & PADLright) == 0)
 				sprite_set_uv(&player[1], 0, 46*1, 41, 46);
 				
@@ -174,7 +216,22 @@ int main() {
 			if(player[1].pos.vx > SCREEN_WIDTH)	
 				player[1].pos.vx = 0;
 		}
-		FntPrint("hello world");
+
+		// =============== 
+		// 	DRAW
+		// =============== 
+		//FntPrint("hello world");
+		for(i = 0; i < 5; i++)
+		{
+			drawSprt(&rods[i].dr_mode, &rods[i].sprt);
+			// check rod collision
+			if(player[0].pos.vx + (player[0].w-10) >= rods[i].sprt.x0 && 
+			player[0].pos.vx + 10 <= rods[i].sprt.x0 + rods[i].sprt.w)
+			{
+				FntPrint("\n\n\nrod collision");
+				onRod[0] = 1;
+			}
+		}
 		drawSprite_2d(&player[0]);
 		drawSprite_2d(&player[1]);
 
@@ -202,7 +259,7 @@ void gravity(Sprite *s, int n) {
 		}
 	}
 	//if(fall[n] == 1 && s->pos.vy < SCREEN_HEIGHT - s->h)
-	if(fall[n] == 1)
+	if(fall[n] == 1 && onRod[n] == 0)
 		s->pos.vy += 2;
 
 	if(s->pos.vy >= SCREEN_HEIGHT+100)
