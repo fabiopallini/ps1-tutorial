@@ -15,7 +15,7 @@ BLOCK blocks[n_blocks];
 
 void gravity(Sprite *s, int n);
 
-void block_init(BLOCK *b){
+void init_block(BLOCK *b) {
 	SetDrawMode(&b->dr_mode, 0, 0, GetTPage(2, 0, 768, 0), 0);
 	SetSprt(&b->sprt);
 	b->sprt.u0 = 0; 
@@ -25,24 +25,14 @@ void block_init(BLOCK *b){
 	setRGB0(&b->sprt, 255, 255, 255);
 }
 
-int main() {
+void init_map() {
 	int i = 0;
 	int k = 0;
-	psSetup();
-	cd_open();
-	cd_read_file("PLAYER1.TIM", &cd_data[0]);
-	cd_read_file("GFX1.TIM", &cd_data[1]);
-	cd_close();
-	
-	tpages[0] = loadToVRAM(cd_data[0]);
-	tpages[1] = loadToVRAM(cd_data[1]);
-	//free3(cd_data);
-
 	for(i = 0; i < n_blocks; i++){
 		int x = 0;
 		int y = 0;
 		int block_y = 48;
-		block_init(&blocks[i]);
+		init_block(&blocks[i]);
 
 		if(i <= 3){
 			x = 40+(15*i); 
@@ -109,7 +99,10 @@ int main() {
 		
 		setXY0(&blocks[i].sprt, x, y);
 	}
+}
 
+void init_players() {
+	int i;
 	for(i = 0; i <= 1; i++){
 		sprite_init(&player[i], 31, 36, tpages[0]);
 		player[i].direction = 1;
@@ -118,6 +111,21 @@ int main() {
 	}
 	player[0].pos.vx = 35;
 	player[1].pos.vx = SCREEN_WIDTH - 100; 
+}
+
+int main() {
+	psSetup();
+	cd_open();
+	cd_read_file("PLAYER1.TIM", &cd_data[0]);
+	cd_read_file("GFX1.TIM", &cd_data[1]);
+	cd_close();
+	
+	tpages[0] = loadToVRAM(cd_data[0]);
+	tpages[1] = loadToVRAM(cd_data[1]);
+	//free3(cd_data);
+	
+	init_map();
+	init_players();
 
 	while(1) {
 		int i = 0;
@@ -179,7 +187,7 @@ int main() {
 	return 0;
 }
 
-void gravity(Sprite *s, int n){
+void gravity(Sprite *s, int n) {
 	int i = 0;
 	int margin = 10;
 	fall[n] = 1; // falling down
@@ -193,7 +201,11 @@ void gravity(Sprite *s, int n){
 			break;
 		}
 	}
-	if(fall[n] == 1 && s->pos.vy < SCREEN_HEIGHT - s->h)
+	//if(fall[n] == 1 && s->pos.vy < SCREEN_HEIGHT - s->h)
+	if(fall[n] == 1)
 		s->pos.vy += 2;
+
+	if(s->pos.vy >= SCREEN_HEIGHT+100)
+		init_players();
 }
 
