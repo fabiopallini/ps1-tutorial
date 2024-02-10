@@ -18,7 +18,7 @@ typedef struct {
 	DR_MODE dr_mode;
 	SPRT sprt;
 } ROD;
-ROD rods[2][10];
+ROD rods[2][14];
 int rods_length[2];
 
 void gravity(Sprite *s, int n);
@@ -136,13 +136,9 @@ void init_rods() {
 	for(k = 0; k <= 1; k++){
 		for(i = 0; i < rods_length[k]; i++){
 			init_rod(&rods[k][i]);
-			setXY0(&rods[k][i].sprt, 50+(40*k), (SCREEN_HEIGHT-35)-(i*16));
+			setXY0(&rods[k][i].sprt, 50+(40*k), (SCREEN_HEIGHT-32)-(i*16));
 		}
 	}
-	/*for(i = 0; i < 5; i++){
-		init_rod(&rods[0][i]);
-		setXY0(&rods[0][i].sprt, 50, (SCREEN_HEIGHT-35)-(i*16));
-	}*/
 }
 
 int main() {
@@ -159,7 +155,9 @@ int main() {
 	onRod[0] = -1;
 	onRod[1] = -1;
 	rods_length[0] = 5;
-	rods_length[1] = 10;
+	//rods_length[0] = 8;
+	//rods_length[0] = 11;
+	rods_length[1] = 14;
 
 	init_map();
 	init_players();
@@ -197,7 +195,7 @@ int main() {
 			sprite_set_uv(&player[0], 0, 46*3, 41, 46);
 			if(pad & PADLup && player[0].pos.vy + player[0].h / 2 > rods[ onRod[0] ] [ rods_length[ onRod[0]]-1 ].sprt.y0)
 				player[0].pos.vy -= 2;
-			if(pad & PADLdown && player[0].pos.vy + player[0].h / 2 < rods[ onRod[0] ] [ 0 ].sprt.y0)
+			if(pad & PADLdown && player[0].pos.vy + player[0].h / 2 < rods[ onRod[0] ] [ 0 ].sprt.y0 - 4)
 				player[0].pos.vy += 2;
 			if((opad & PADLleft) == 0 && pad & PADLleft){
 				player[0].pos.vx -= player[0].w / 3;
