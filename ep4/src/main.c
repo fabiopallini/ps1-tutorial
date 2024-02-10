@@ -136,7 +136,10 @@ void init_rods() {
 	for(k = 0; k <= 1; k++){
 		for(i = 0; i < rods_length[k]; i++){
 			init_rod(&rods[k][i]);
-			setXY0(&rods[k][i].sprt, 50+(40*k), (SCREEN_HEIGHT-32)-(i*16));
+			if(k == 0)
+				setXY0(&rods[k][i].sprt, 50, (48*5)-16-(i*16));
+			if(k == 1)
+				setXY0(&rods[k][i].sprt, 80, (48*4)-16-(i*16));
 		}
 	}
 }
@@ -154,10 +157,13 @@ int main() {
 	
 	onRod[0] = -1;
 	onRod[1] = -1;
-	rods_length[0] = 5;
+	//rods_length[0] = 5;
 	//rods_length[0] = 8;
 	//rods_length[0] = 11;
-	rods_length[1] = 14;
+	//rods_length[0] = 14;
+	//
+	rods_length[0] = 14;
+	rods_length[1] = 5;
 
 	init_map();
 	init_players();
@@ -193,17 +199,25 @@ int main() {
 		}
 		if(onRod[0] >= 0) {
 			sprite_set_uv(&player[0], 0, 46*3, 41, 46);
+
 			if(pad & PADLup && player[0].pos.vy + player[0].h / 2 > rods[ onRod[0] ] [ rods_length[ onRod[0]]-1 ].sprt.y0)
 				player[0].pos.vy -= 2;
+
 			if(pad & PADLdown && player[0].pos.vy + player[0].h / 2 < rods[ onRod[0] ] [ 0 ].sprt.y0 - 4)
 				player[0].pos.vy += 2;
+
 			if((opad & PADLleft) == 0 && pad & PADLleft){
 				player[0].pos.vx -= player[0].w / 3;
 				onRod[0] = -1;
+				player[0].direction = 0;
+				sprite_set_uv(&player[0], 41, 46, 41, 46);
 			}
+
 			if((opad & PADLright) == 0 && pad & PADLright){
 				player[0].pos.vx += player[0].w / 3;
 				onRod[0] = -1;
+				player[0].direction = 1;
+				sprite_set_uv(&player[0], 41, 46, 41, 46);
 			}
 		}
 		// PLAYER 2 INPUT
