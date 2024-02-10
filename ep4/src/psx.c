@@ -59,6 +59,7 @@ void psSetup()
 
 void psDisplay(){
 	opad = pad;
+	opad2 = pad2;
 
 	DrawSync(0);
 	VSync(0);

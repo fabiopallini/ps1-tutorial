@@ -49,7 +49,7 @@ typedef struct {
 
 Camera camera;
 
-u_long pad, pad2, opad;
+u_long pad, pad2, opad, opad2;
 
 void psSetup();
 void psClear();

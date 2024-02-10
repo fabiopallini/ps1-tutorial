@@ -111,10 +111,9 @@ void init_map() {
 void init_rod(ROD *r) {
 	SetDrawMode(&r->dr_mode, 0, 0, GetTPage(2, 0, 768, 0), 0);
 	SetSprt(&r->sprt);
-	r->sprt.u0 = 0; 
+	r->sprt.u0 = 16; 
 	r->sprt.v0 = 0;
-	//r->sprt.w = 2; 
-	r->sprt.w = 13; 
+	r->sprt.w = 3; 
 	r->sprt.h = 16;
 	setRGB0(&r->sprt, 255, 255, 255);
 }
@@ -186,15 +185,14 @@ int main() {
 				player[0].pos.vy -= 2;
 			if(pad & PADLdown)
 				player[0].pos.vy += 2;
-			if(pad & PADLleft) {
-				player[0].pos.vx -= 2;
+			if((opad & PADLleft) == 0 && pad & PADLleft){
+				player[0].pos.vx -= player[0].w / 3;
 				onRod[0] = 0;
 			}
-			if(pad & PADLright) {
-				player[0].pos.vx += 2;
+			if((opad & PADLright) == 0 && pad & PADLright){
+				player[0].pos.vx += player[0].w / 3;
 				onRod[0] = 0;
 			}
-				
 		}
 		// PLAYER 2 INPUT
 		if(fall[1] == 0 && onRod[1] == 0) {
@@ -225,11 +223,16 @@ int main() {
 		{
 			drawSprt(&rods[i].dr_mode, &rods[i].sprt);
 			// check rod collision
-			if(player[0].pos.vx + (player[0].w-10) >= rods[i].sprt.x0 && 
-			player[0].pos.vx + 10 <= rods[i].sprt.x0 + rods[i].sprt.w)
-			{
-				FntPrint("\n\n\nrod collision");
-				onRod[0] = 1;
+			if(pad & PADLup || pad & PADLdown){
+				if(player[0].pos.vx + (player[0].w-10) >= rods[i].sprt.x0 && 
+				player[0].pos.vx + 10 <= rods[i].sprt.x0 + rods[i].sprt.w &&
+				player[0].pos.vy + player[0].h >= rods[i].sprt.y0 &&
+				player[0].pos.vy <= rods[i].sprt.y0)
+				{
+					FntPrint("\n\n\nrod collision");
+					onRod[0] = 1;
+					player[0].pos.vx = rods[i].sprt.x0 - player[0].w/2;
+				}
 			}
 		}
 		drawSprite_2d(&player[0]);
