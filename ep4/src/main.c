@@ -18,7 +18,8 @@ typedef struct {
 	DR_MODE dr_mode;
 	SPRT sprt;
 } ROD;
-ROD rods[1][5];
+ROD rods[2][10];
+int rods_length[2];
 
 void gravity(Sprite *s, int n);
 
@@ -131,11 +132,17 @@ void init_players() {
 }
 
 void init_rods() {
-	int i;
-	for(i = 0; i < 5; i++){
+	int k, i;
+	for(k = 0; k <= 1; k++){
+		for(i = 0; i < rods_length[k]; i++){
+			init_rod(&rods[k][i]);
+			setXY0(&rods[k][i].sprt, 50+(40*k), (SCREEN_HEIGHT-35)-(i*16));
+		}
+	}
+	/*for(i = 0; i < 5; i++){
 		init_rod(&rods[0][i]);
 		setXY0(&rods[0][i].sprt, 50, (SCREEN_HEIGHT-35)-(i*16));
-	}
+	}*/
 }
 
 int main() {
@@ -151,12 +158,15 @@ int main() {
 	
 	onRod[0] = -1;
 	onRod[1] = -1;
+	rods_length[0] = 5;
+	rods_length[1] = 10;
 
 	init_map();
 	init_players();
 	init_rods();
 
 	while(1) {
+		int k = 0;
 		int i = 0;
 		psClear();
 	
@@ -185,9 +195,9 @@ int main() {
 		}
 		if(onRod[0] >= 0) {
 			sprite_set_uv(&player[0], 0, 46*3, 41, 46);
-			if(pad & PADLup && player[0].pos.vy + player[0].h / 2 > rods[0][4].sprt.y0)
+			if(pad & PADLup && player[0].pos.vy + player[0].h / 2 > rods[ onRod[0] ] [ rods_length[ onRod[0]]-1 ].sprt.y0)
 				player[0].pos.vy -= 2;
-			if(pad & PADLdown && player[0].pos.vy + player[0].h / 2 < rods[0][0].sprt.y0)
+			if(pad & PADLdown && player[0].pos.vy + player[0].h / 2 < rods[ onRod[0] ] [ 0 ].sprt.y0)
 				player[0].pos.vy += 2;
 			if((opad & PADLleft) == 0 && pad & PADLleft){
 				player[0].pos.vx -= player[0].w / 3;
@@ -226,18 +236,20 @@ int main() {
 		drawSprite_2d(&player[0]);
 		drawSprite_2d(&player[1]);
 
-		for(i = 0; i < 5; i++)
-		{
-			drawSprt(&rods[0][i].dr_mode, &rods[0][i].sprt);
-			// check rod collision
-			if(pad & PADLup || pad & PADLdown){
-				if(player[0].pos.vx + (player[0].w-10) >= rods[0][i].sprt.x0 && 
-				player[0].pos.vx + 10 <= rods[0][i].sprt.x0 + rods[0][i].sprt.w &&
-				player[0].pos.vy + player[0].h >= rods[0][i].sprt.y0 &&
-				player[0].pos.vy <= rods[0][i].sprt.y0)
-				{
-					onRod[0] = i;
-					player[0].pos.vx = rods[0][i].sprt.x0 - player[0].w/2;
+		for(k = 0; k <= 1; k++){
+			for(i = 0; i < rods_length[k]; i++)
+			{
+				drawSprt(&rods[k][i].dr_mode, &rods[k][i].sprt);
+				// check rod collision
+				if(pad & PADLup || pad & PADLdown){
+					if(player[0].pos.vx + (player[0].w-10) >= rods[k][i].sprt.x0 && 
+					player[0].pos.vx + 10 <= rods[k][i].sprt.x0 + rods[k][i].sprt.w &&
+					player[0].pos.vy + player[0].h >= rods[k][i].sprt.y0 &&
+					player[0].pos.vy <= rods[k][i].sprt.y0)
+					{
+						onRod[0] = k;
+						player[0].pos.vx = rods[k][i].sprt.x0 - player[0].w/2;
+					}
 				}
 			}
 		}
