@@ -2,6 +2,7 @@
 
 #define n_blocks 55
 #define n_rods 4
+#define SPEED 1 
 #define GRAVITY 2 
 #define JUMP_SPEED 8 
 #define JUMP_FRICTION 0.9 
@@ -228,12 +229,12 @@ int main() {
 				if(pad[i] & PADLleft){
 					player[i].direction = 0;
 					sprite_anim(&player[i], 41, 46, 0, 0, 6);
-					player[i].pos.vx -= 2;
+					player[i].pos.vx -= SPEED;
 				}
 				if(pad[i] & PADLright){
 					player[i].direction = 1;
 					sprite_anim(&player[i], 41, 46, 0, 0, 6);
-					player[i].pos.vx += 2;
+					player[i].pos.vx += SPEED;
 				}
 				if(player[i].pos.vx + player[i].w < 0)	
 					player[i].pos.vx = SCREEN_WIDTH;
@@ -244,10 +245,10 @@ int main() {
 				sprite_set_uv(&player[i], 0, 46*3, 41, 46);
 
 				if(pad[i] & PADLup && player[i].pos.vy + player[i].h / 2 > rods[ onRod[i] ] [ rods_length[ onRod[i]]-1 ].sprt.y0)
-					player[i].pos.vy -= 2;
+					player[i].pos.vy -= SPEED;
 
 				if(pad[i] & PADLdown && player[i].pos.vy + player[i].h / 2 < rods[ onRod[i] ] [ 0 ].sprt.y0 - 4)
-					player[i].pos.vy += 2;
+					player[i].pos.vy += SPEED;
 
 				if((opad[i] & PADLleft) == 0 && pad[i] & PADLleft){
 					player[i].pos.vx -= player[i].w / 3;
@@ -312,12 +313,15 @@ void gravity(Sprite *s, int n) {
 		s->pos.vy + s->h <= blocks[i].sprt.y0 + 1) 
 		{
 			fall[n] = 0;
+			s->isJumping = 0;
 			break;
 		}
 	}
 	//if(fall[n] == 1 && s->pos.vy < SCREEN_HEIGHT - s->h)
-	if(fall[n] == 1 && onRod[n] == -1)
+	if(fall[n] == 1 && onRod[n] == -1){
 		s->pos.vy += GRAVITY;
+		sprite_anim(player, 41, 46, 1, 1, 1);
+	}
 
 	if(s->pos.vy >= SCREEN_HEIGHT+100)
 		init_players();
@@ -333,15 +337,22 @@ int collision(Sprite s1, Sprite s2){
 }
 
 void jump(Sprite *player, int i){
-	if (fall[i] == 0 && onRod[i] == -1 && (opad[i] & PADLsquare) == 0 && pad[i] & PADLsquare){
+	if(fall[i] == 0 && onRod[i] == -1 && (opad[i] & PADLsquare) == 0 && pad[i] & PADLsquare){
 		player->isJumping = 1;
+		if(pad[i] & PADLleft)
+			player->isJumping = 2;
+		if(pad[i] & PADLright)
+			player->isJumping = 3;
 		player->jump_speed = JUMP_SPEED;
+		player->sideJump_speed = 8;
 	}
-	if (player->isJumping == 1){
+	if(player->isJumping > 0){
 		player->pos.vy -= player->jump_speed;
 		player->jump_speed *= JUMP_FRICTION;
-		//sprite_anim(player, 41, 46, 1, 1, 1);
+		player->sideJump_speed *= 0.9;
+		if (player->isJumping == 2)
+			player->pos.vx -= player->sideJump_speed;
+		if (player->isJumping == 3)
+			player->pos.vx += player->sideJump_speed;
 	}
-	else
-		player->isJumping = 0;
 }
