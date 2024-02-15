@@ -146,11 +146,11 @@ void init_rods() {
 			if(k == 0)
 				setXY0(&rods[k][i].sprt, 50, (48*5)-16-(i*16));
 			if(k == 1)
-				setXY0(&rods[k][i].sprt, 80, (48*4)-16-(i*16));
+				setXY0(&rods[k][i].sprt, 90, (48*4)-16-(i*16));
 			if(k == 2)
 				setXY0(&rods[k][i].sprt, 240, (48*5)-16-(i*16));
 			if(k == 3)
-				setXY0(&rods[k][i].sprt, 160, (48*4)-16-(i*16));
+				setXY0(&rods[k][i].sprt, 200, (48*4)-16-(i*16));
 		}
 	}
 }
