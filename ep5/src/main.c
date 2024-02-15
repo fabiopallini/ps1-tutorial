@@ -22,6 +22,7 @@ ROD rods[2][14];
 int rods_length[2];
 
 void gravity(Sprite *s, int n);
+int collision(Sprite s1, Sprite s2);
 
 void init_block(BLOCK *b) {
 	SetDrawMode(&b->dr_mode, 0, 0, GetTPage(2, 0, 768, 0), 0);
@@ -177,8 +178,33 @@ int main() {
 		gravity(&player[0], 0);
 		gravity(&player[1], 1);
 
+		if(collision(player[0], player[1]) == 1){
+			FntPrint("collision");
+			player[0].hitted = 10;
+			player[1].hitted = 10;
+		}
+		
+		if(player[0].hitted > 0){	
+			player[0].hitted -= 1;
+			player[1].hitted -= 1;
+			if(player[0].pos.vx <= player[1].pos.vx){
+				player[0].direction = 1;
+				player[0].pos.vx -= 4;
+				player[1].direction = 0;
+				player[1].pos.vx += 4;
+			}
+			if(player[0].pos.vx >= player[1].pos.vx){
+				player[0].direction = 0;
+				player[0].pos.vx += 4;
+				player[1].direction = 1;
+				player[1].pos.vx -= 4;
+			}
+			sprite_set_uv(&player[0], 41*5, 46, 41, 46);
+			sprite_set_uv(&player[1], 41*5, 46, 41, 46);
+		}
+
 		// PLAYER 1 INPUT
-		if(fall[0] == 0 && onRod[0] == -1) {
+		if(player[0].hitted <= 0 && fall[0] == 0 && onRod[0] == -1) {
 			if((pad & PADLleft) == 0 && (pad & PADLright) == 0)
 				sprite_set_uv(&player[0], 0, 46*1, 41, 46);
 				
@@ -221,7 +247,7 @@ int main() {
 			}
 		}
 		// PLAYER 2 INPUT
-		if(fall[1] == 0 && onRod[1] == -1) {
+		if(player[1].hitted <= 0 && fall[1] == 0 && onRod[1] == -1) {
 			if((pad2 & PADLleft) == 0 && (pad2 & PADLright) == 0)
 				sprite_set_uv(&player[1], 0, 46*1, 41, 46);
 				
@@ -297,3 +323,11 @@ void gravity(Sprite *s, int n) {
 		init_players();
 }
 
+int collision(Sprite s1, Sprite s2){
+	if(s1.pos.vx + s1.w/2 > s2.pos.vx && 
+	s1.pos.vx < s2.pos.vx + s2.w/2 &&
+	s1.pos.vy + s1.h/2 > s2.pos.vy &&
+	s1.pos.vy < s2.pos.vy + s2.h/2)
+		return 1;
+	return 0;
+}
