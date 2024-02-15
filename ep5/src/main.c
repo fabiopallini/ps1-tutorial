@@ -1,6 +1,7 @@
 #include "psx.h"
 
 #define n_blocks 55
+#define n_rods 4
 
 u_long *cd_data[2];
 u_short tpages[2];
@@ -18,8 +19,8 @@ typedef struct {
 	DR_MODE dr_mode;
 	SPRT sprt;
 } ROD;
-ROD rods[2][14];
-int rods_length[2];
+ROD rods[n_rods][14];
+int rods_length[n_rods];
 
 void gravity(Sprite *s, int n);
 int collision(Sprite s1, Sprite s2);
@@ -134,13 +135,17 @@ void init_players() {
 
 void init_rods() {
 	int k, i;
-	for(k = 0; k <= 1; k++){
+	for(k = 0; k < n_rods; k++){
 		for(i = 0; i < rods_length[k]; i++){
 			init_rod(&rods[k][i]);
 			if(k == 0)
 				setXY0(&rods[k][i].sprt, 50, (48*5)-16-(i*16));
 			if(k == 1)
 				setXY0(&rods[k][i].sprt, 80, (48*4)-16-(i*16));
+			if(k == 2)
+				setXY0(&rods[k][i].sprt, 240, (48*5)-16-(i*16));
+			if(k == 3)
+				setXY0(&rods[k][i].sprt, 160, (48*4)-16-(i*16));
 		}
 	}
 }
@@ -165,6 +170,8 @@ int main() {
 	//
 	rods_length[0] = 14;
 	rods_length[1] = 5;
+	rods_length[2] = 14;
+	rods_length[3] = 5;
 
 	init_map();
 	init_players();
@@ -173,18 +180,22 @@ int main() {
 	while(1) {
 		int k = 0;
 		int i = 0;
+		int ii = 0;
 		psClear();
 	
 		gravity(&player[0], 0);
 		gravity(&player[1], 1);
 
 		if(collision(player[0], player[1]) == 1){
-			FntPrint("collision");
 			player[0].hitted = 10;
+			onRod[0] = -1;
+			fall[0] = 0;
 			player[1].hitted = 10;
+			onRod[1] = -1;
+			fall[1] = 0;
 		}
 		
-		if(player[0].hitted > 0){	
+		if(player[0].hitted > 0 && player[1].hitted > 0){	
 			player[0].hitted -= 1;
 			player[1].hitted -= 1;
 			if(player[0].pos.vx <= player[1].pos.vx){
@@ -204,67 +215,49 @@ int main() {
 		}
 
 		// PLAYER 1 INPUT
-		if(player[0].hitted <= 0 && fall[0] == 0 && onRod[0] == -1) {
-			if((pad & PADLleft) == 0 && (pad & PADLright) == 0)
-				sprite_set_uv(&player[0], 0, 46*1, 41, 46);
-				
-			if(pad & PADLleft){
-				player[0].direction = 0;
-				sprite_anim(&player[0], 41, 46, 0, 0, 6);
-				player[0].pos.vx -= 2;
+		for(i = 0; i < 2; i++){
+			if(player[i].hitted <= 0 && fall[i] == 0 && onRod[i] == -1) {
+				if((pad[i] & PADLleft) == 0 && (pad[i] & PADLright) == 0)
+					sprite_set_uv(&player[i], 0, 46*1, 41, 46);
+					
+				if(pad[i] & PADLleft){
+					player[i].direction = 0;
+					sprite_anim(&player[i], 41, 46, 0, 0, 6);
+					player[i].pos.vx -= 2;
+				}
+				if(pad[i] & PADLright){
+					player[i].direction = 1;
+					sprite_anim(&player[i], 41, 46, 0, 0, 6);
+					player[i].pos.vx += 2;
+				}
+				if(player[i].pos.vx + player[i].w < 0)	
+					player[i].pos.vx = SCREEN_WIDTH;
+				if(player[i].pos.vx > SCREEN_WIDTH)	
+					player[i].pos.vx = 0;
 			}
-			if(pad & PADLright){
-				player[0].direction = 1;
-				sprite_anim(&player[0], 41, 46, 0, 0, 6);
-				player[0].pos.vx += 2;
-			}
-			if(player[0].pos.vx + player[0].w < 0)	
-				player[0].pos.vx = SCREEN_WIDTH;
-			if(player[0].pos.vx > SCREEN_WIDTH)	
-				player[0].pos.vx = 0;
-		}
-		if(onRod[0] >= 0) {
-			sprite_set_uv(&player[0], 0, 46*3, 41, 46);
+			if(onRod[i] >= 0) {
+				sprite_set_uv(&player[i], 0, 46*3, 41, 46);
 
-			if(pad & PADLup && player[0].pos.vy + player[0].h / 2 > rods[ onRod[0] ] [ rods_length[ onRod[0]]-1 ].sprt.y0)
-				player[0].pos.vy -= 2;
+				if(pad[i] & PADLup && player[i].pos.vy + player[i].h / 2 > rods[ onRod[i] ] [ rods_length[ onRod[i]]-1 ].sprt.y0)
+					player[i].pos.vy -= 2;
 
-			if(pad & PADLdown && player[0].pos.vy + player[0].h / 2 < rods[ onRod[0] ] [ 0 ].sprt.y0 - 4)
-				player[0].pos.vy += 2;
+				if(pad[i] & PADLdown && player[i].pos.vy + player[i].h / 2 < rods[ onRod[i] ] [ 0 ].sprt.y0 - 4)
+					player[i].pos.vy += 2;
 
-			if((opad & PADLleft) == 0 && pad & PADLleft){
-				player[0].pos.vx -= player[0].w / 3;
-				onRod[0] = -1;
-				player[0].direction = 0;
-				sprite_set_uv(&player[0], 41, 46, 41, 46);
-			}
+				if((opad[i] & PADLleft) == 0 && pad[i] & PADLleft){
+					player[i].pos.vx -= player[i].w / 3;
+					onRod[i] = -1;
+					player[i].direction = 0;
+					sprite_set_uv(&player[i], 41, 46, 41, 46);
+				}
 
-			if((opad & PADLright) == 0 && pad & PADLright){
-				player[0].pos.vx += player[0].w / 3;
-				onRod[0] = -1;
-				player[0].direction = 1;
-				sprite_set_uv(&player[0], 41, 46, 41, 46);
+				if((opad[i] & PADLright) == 0 && pad[i] & PADLright){
+					player[i].pos.vx += player[i].w / 3;
+					onRod[i] = -1;
+					player[i].direction = 1;
+					sprite_set_uv(&player[i], 41, 46, 41, 46);
+				}
 			}
-		}
-		// PLAYER 2 INPUT
-		if(player[1].hitted <= 0 && fall[1] == 0 && onRod[1] == -1) {
-			if((pad2 & PADLleft) == 0 && (pad2 & PADLright) == 0)
-				sprite_set_uv(&player[1], 0, 46*1, 41, 46);
-				
-			if(pad2 & PADLleft){
-				player[1].direction = 0;
-				sprite_anim(&player[1], 41, 46, 0, 0, 6);
-				player[1].pos.vx -= 2;
-			}
-			if(pad2 & PADLright){
-				player[1].direction = 1;
-				sprite_anim(&player[1], 41, 46, 0, 0, 6);
-				player[1].pos.vx += 2;
-			}
-			if(player[1].pos.vx + player[1].w < 0)	
-				player[1].pos.vx = SCREEN_WIDTH;
-			if(player[1].pos.vx > SCREEN_WIDTH)	
-				player[1].pos.vx = 0;
 		}
 
 		// =============== 
@@ -274,19 +267,21 @@ int main() {
 		drawSprite_2d(&player[0]);
 		drawSprite_2d(&player[1]);
 
-		for(k = 0; k <= 1; k++){
+		for(k = 0; k < n_rods; k++){
 			for(i = 0; i < rods_length[k]; i++)
 			{
 				drawSprt(&rods[k][i].dr_mode, &rods[k][i].sprt);
 				// check rod collision
-				if(pad & PADLup || pad & PADLdown){
-					if(player[0].pos.vx + (player[0].w-10) >= rods[k][i].sprt.x0 && 
-					player[0].pos.vx + 10 <= rods[k][i].sprt.x0 + rods[k][i].sprt.w &&
-					player[0].pos.vy + player[0].h >= rods[k][i].sprt.y0 &&
-					player[0].pos.vy <= rods[k][i].sprt.y0)
-					{
-						onRod[0] = k;
-						player[0].pos.vx = rods[k][i].sprt.x0 - player[0].w/2;
+				for(ii = 0; ii < 2; ii++){
+					if(pad[ii] & PADLup || pad[ii] & PADLdown){
+						if(player[ii].pos.vx + (player[ii].w-10) >= rods[k][i].sprt.x0 && 
+						player[ii].pos.vx + 10 <= rods[k][i].sprt.x0 + rods[k][i].sprt.w &&
+						player[ii].pos.vy + player[ii].h >= rods[k][i].sprt.y0 &&
+						player[ii].pos.vy <= rods[k][i].sprt.y0)
+						{
+							onRod[ii] = k;
+							player[ii].pos.vx = rods[k][i].sprt.x0 - player[ii].w/2;
+						}
 					}
 				}
 			}

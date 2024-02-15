@@ -58,8 +58,8 @@ void psSetup()
 }
 
 void psDisplay(){
-	opad = pad;
-	opad2 = pad2;
+	opad[0] = pad[0];
+	opad[1] = pad[1];
 
 	DrawSync(0);
 	VSync(0);
@@ -78,8 +78,8 @@ void psClear(){
 	dispid = (dispid + 1) %2;
 	//ClearOTag(ot, OTSIZE);
 	ClearOTagR(ot, OTSIZE);
-	pad = PadRead(0);
-	pad2 = pad >> 16;
+	pad[0] = PadRead(0);
+	pad[1] = pad[0] >> 16;
 
 	RotMatrix(&camera.rot, &camera.mtx);
 	ApplyMatrixLV(&camera.mtx, &camera.pos, &camera.tmp);	
