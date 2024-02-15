@@ -2,6 +2,9 @@
 
 #define n_blocks 55
 #define n_rods 4
+#define GRAVITY 2 
+#define JUMP_SPEED 8 
+#define JUMP_FRICTION 0.9 
 
 u_long *cd_data[2];
 u_short tpages[2];
@@ -24,6 +27,7 @@ int rods_length[n_rods];
 
 void gravity(Sprite *s, int n);
 int collision(Sprite s1, Sprite s2);
+void jump(Sprite *player, int i);
 
 void init_block(BLOCK *b) {
 	SetDrawMode(&b->dr_mode, 0, 0, GetTPage(2, 0, 768, 0), 0);
@@ -185,6 +189,7 @@ int main() {
 	
 		gravity(&player[0], 0);
 		gravity(&player[1], 1);
+		jump(&player[0], 0);
 
 		if(collision(player[0], player[1]) == 1){
 			player[0].hitted = 10;
@@ -214,7 +219,7 @@ int main() {
 			sprite_set_uv(&player[1], 41*5, 46, 41, 46);
 		}
 
-		// PLAYER 1 INPUT
+		// PLAYER 1-2 INPUT
 		for(i = 0; i < 2; i++){
 			if(player[i].hitted <= 0 && fall[i] == 0 && onRod[i] == -1) {
 				if((pad[i] & PADLleft) == 0 && (pad[i] & PADLright) == 0)
@@ -312,7 +317,7 @@ void gravity(Sprite *s, int n) {
 	}
 	//if(fall[n] == 1 && s->pos.vy < SCREEN_HEIGHT - s->h)
 	if(fall[n] == 1 && onRod[n] == -1)
-		s->pos.vy += 2;
+		s->pos.vy += GRAVITY;
 
 	if(s->pos.vy >= SCREEN_HEIGHT+100)
 		init_players();
@@ -325,4 +330,18 @@ int collision(Sprite s1, Sprite s2){
 	s1.pos.vy < s2.pos.vy + s2.h/2)
 		return 1;
 	return 0;
+}
+
+void jump(Sprite *player, int i){
+	if (fall[i] == 0 && onRod[i] == -1 && (opad[i] & PADLsquare) == 0 && pad[i] & PADLsquare){
+		player->isJumping = 1;
+		player->jump_speed = JUMP_SPEED;
+	}
+	if (player->isJumping == 1){
+		player->pos.vy -= player->jump_speed;
+		player->jump_speed *= JUMP_FRICTION;
+		//sprite_anim(player, 41, 46, 1, 1, 1);
+	}
+	else
+		player->isJumping = 0;
 }
