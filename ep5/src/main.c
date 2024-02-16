@@ -4,7 +4,7 @@
 #define n_rods 4
 #define SPEED 1 
 #define GRAVITY 2 
-#define JUMP_SPEED 8 
+#define JUMP_SPEED 10 
 #define JUMP_FRICTION 0.9 
 
 u_long *cd_data[2];
@@ -191,6 +191,7 @@ int main() {
 		gravity(&player[0], 0);
 		gravity(&player[1], 1);
 		jump(&player[0], 0);
+		jump(&player[1], 1);
 
 		if(collision(player[0], player[1]) == 1){
 			player[0].hitted = 10;
@@ -320,7 +321,7 @@ void gravity(Sprite *s, int n) {
 	//if(fall[n] == 1 && s->pos.vy < SCREEN_HEIGHT - s->h)
 	if(fall[n] == 1 && onRod[n] == -1){
 		s->pos.vy += GRAVITY;
-		sprite_anim(player, 41, 46, 1, 1, 1);
+		sprite_anim(s, 41, 46, 1, 1, 1);
 	}
 
 	if(s->pos.vy >= SCREEN_HEIGHT+100)
