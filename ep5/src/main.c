@@ -6,12 +6,19 @@
 #define GRAVITY 2 
 #define JUMP_SPEED 10 
 #define JUMP_FRICTION 0.9 
+#define n_balls 1 
 
 u_long *cd_data[2];
 u_short tpages[2];
 Sprite player[2];
 char fall[2];
 int onRod[2];
+
+typedef struct {
+	Sprite sprite;
+	int dirX, dirY;
+} BALL;
+BALL balls[n_balls];
 
 typedef struct {
 	DR_MODE dr_mode;
@@ -116,6 +123,14 @@ void init_map() {
 	}
 }
 
+void init_ball(BALL *ball){
+	sprite_init(&ball->sprite, 16, 16, tpages[1]);
+	ball->sprite.direction = 1;
+	sprite_set_uv(&ball->sprite, 32, 0, 16, 16);
+	ball->dirX = 1;
+	ball->dirY = 1;
+}
+
 void init_rod(ROD *r) {
 	SetDrawMode(&r->dr_mode, 0, 0, GetTPage(2, 0, 768, 0), 0);
 	SetSprt(&r->sprt);
@@ -165,7 +180,9 @@ int main() {
 	tpages[0] = loadToVRAM(cd_data[0]);
 	tpages[1] = loadToVRAM(cd_data[1]);
 	//free3(cd_data);
-	
+
+	init_ball(&balls[0]);
+
 	onRod[0] = -1;
 	onRod[1] = -1;
 	//rods_length[0] = 5;
@@ -267,10 +284,24 @@ int main() {
 			}
 		}
 
+		for(i = 0; i < n_balls; i++){
+			if(balls[i].sprite.pos.vx >= SCREEN_WIDTH - 16 || balls[i].sprite.pos.vx < 0)
+				balls[i].dirX *= -1;
+			if(balls[i].sprite.pos.vy >= SCREEN_HEIGHT - 16 || balls[i].sprite.pos.vy < 0)
+				balls[i].dirY *= -1;
+
+			balls[i].sprite.pos.vx += balls[i].dirX;
+			balls[i].sprite.pos.vy += balls[i].dirY;
+		}
+
 		// =============== 
 		// 	DRAW
 		// =============== 
+
 		//FntPrint("hello world");
+		for(i = 0; i < n_balls; i++)
+			drawSprite_2d(&balls[i].sprite);
+
 		drawSprite_2d(&player[0]);
 		drawSprite_2d(&player[1]);
 

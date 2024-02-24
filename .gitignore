@@ -5,6 +5,8 @@ myconf.conf
 *.xcf
 src/*.EXE
 src/*.exe
+ep5/data/*.exe
+ep5/data/*.dll
 *.cpe
 *.TOC
 *.IMG
