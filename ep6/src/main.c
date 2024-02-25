@@ -13,6 +13,7 @@ u_long *cd_data[2];
 u_short tpages[2];
 Sprite player[2];
 int points[2];
+char die[2];
 char fall[2];
 int onRod[2];
 int skill[2];
@@ -247,6 +248,12 @@ int main() {
 		jump(&player[0], 0);
 		jump(&player[1], 1);
 
+		if(die[1] > 0){
+			die[1]--;
+			if(die[1] <= 0)
+				playerDead(1);
+		}
+
 		for(i = 0; i < n_balls; i++){
 			for(k = 0; k < 2; k++){
 				if(collision(balls[i].sprite, player[k]) == 1){
@@ -257,31 +264,41 @@ int main() {
 		}
 
 		if(collision(player[0], player[1]) == 1){
-			player[0].hitted = 10;
-			onRod[0] = -1;
-			fall[0] = 0;
-			player[1].hitted = 10;
-			onRod[1] = -1;
-			fall[1] = 0;
+			if(die[0] == 0 && die[1] == 0)
+			{
+				if(skill[0] == SHOCK)
+				{
+					//skill[0] = 0; 
+					die[1] = 10;
+					player[1].hitted = 10;
+					onRod[1] = -1;
+					fall[1] = 0;
+				}
+				else 
+				{
+					player[0].hitted = 10;
+					onRod[0] = -1;
+					fall[0] = 0;
+					player[1].hitted = 10;
+					onRod[1] = -1;
+					fall[1] = 0;
+				}
+			}
 		}
 		
-		if(player[0].hitted > 0 && player[1].hitted > 0){	
-			player[0].hitted -= 1;
-			player[1].hitted -= 1;
-			if(player[0].pos.vx <= player[1].pos.vx){
-				player[0].direction = 1;
-				player[0].pos.vx -= 4;
-				player[1].direction = 0;
-				player[1].pos.vx += 4;
+		for(i = 0; i < 2; i++){
+			if(player[i].hitted > 0){
+				player[i].hitted -= 1;
+				if(player[i].pos.vx <= player[(i+1)%2].pos.vx){
+					player[i].direction = 1;
+					player[i].pos.vx -= 4;
+				}
+				if(player[i].pos.vx >= player[(i+1)%2].pos.vx){
+					player[i].direction = 0;
+					player[i].pos.vx += 4;
+				}
+				sprite_set_uv(&player[i], 41*5, 46, 41, 46);
 			}
-			if(player[0].pos.vx >= player[1].pos.vx){
-				player[0].direction = 0;
-				player[0].pos.vx += 4;
-				player[1].direction = 1;
-				player[1].pos.vx -= 4;
-			}
-			sprite_set_uv(&player[0], 41*5, 46, 41, 46);
-			sprite_set_uv(&player[1], 41*5, 46, 41, 46);
 		}
 
 		// PLAYER 1-2 INPUT
