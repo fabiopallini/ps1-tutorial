@@ -7,6 +7,8 @@ src/*.EXE
 src/*.exe
 ep5/data/*.exe
 ep5/data/*.dll
+ep6/data/*.exe
+ep6/data/*.dll
 *.cpe
 *.TOC
 *.IMG
