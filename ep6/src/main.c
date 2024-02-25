@@ -1,4 +1,5 @@
 #include "psx.h"
+#include "rand.h"
 
 #define n_blocks 55
 #define n_rods 4
@@ -15,10 +16,15 @@ char fall[2];
 int onRod[2];
 int skill[2];
 
+typedef enum {
+	GUN = 0,
+	SHOCK,	
+} SKILL;
+
 typedef struct {
 	Sprite sprite;
 	int dirX, dirY;
-	int skill;
+	SKILL skill;
 	char active;
 } BALL;
 BALL balls[n_balls];
@@ -39,6 +45,7 @@ int rods_length[n_rods];
 void gravity(Sprite *s, int n);
 int collision(Sprite s1, Sprite s2);
 void jump(Sprite *player, int i);
+int random(int max);
 
 void init_block(BLOCK *b) {
 	SetDrawMode(&b->dr_mode, 0, 0, GetTPage(2, 0, 768, 0), 0);
@@ -129,17 +136,27 @@ void init_map() {
 void init_ball(BALL *ball){
 	sprite_init(&ball->sprite, 16, 16, tpages[1]);
 	ball->sprite.direction = 1;
-	sprite_set_uv(&ball->sprite, 32, 0, 16, 16);
 	ball->dirX = 1;
 	ball->dirY = 1;
 }
 
-void ball_skill(BALL *ball, int skill){
-	ball->skill = skill;
-	sprite_set_uv(&ball->sprite, 32+(16*skill), 0, 16, 16);
-}
-
 void ball_spawn(BALL *ball){
+	int r = random(1);
+	int pos = random(2);
+	ball->skill = r;
+	sprite_set_uv(&ball->sprite, 32+(16*ball->skill), 0, 16, 16);
+	if(pos == 0){
+		ball->sprite.pos.vx = 0;
+		ball->sprite.pos.vy = SCREEN_HEIGHT / 2;
+	}
+	if(pos == 1){
+		ball->sprite.pos.vx = SCREEN_WIDTH / 2;
+		ball->sprite.pos.vy = 0;
+	}
+	if(pos == 2){
+		ball->sprite.pos.vx = SCREEN_WIDTH - ball->sprite.w;
+		ball->sprite.pos.vy = SCREEN_HEIGHT / 2;
+	}
 	ball->active = 1;
 }
 
@@ -223,9 +240,14 @@ int main() {
 		jump(&player[0], 0);
 		jump(&player[1], 1);
 
-		if(collision(balls[0].sprite, player[0]) == 1){
-			balls[0].active = 0;
-			skill[0] = balls[0].skill;
+		for(i = 0; i < n_balls; i++){
+			for(k = 0; k < 2; k++){
+				if(collision(balls[i].sprite, player[k]) == 1){
+					balls[i].active = 0;
+					skill[k] = balls[i].skill;
+					ball_spawn(&balls[0]);
+				}
+			}
 		}
 
 		if(collision(player[0], player[1]) == 1){
@@ -304,9 +326,9 @@ int main() {
 
 		for(i = 0; i < n_balls; i++){
 			if(balls[i].active == 1){
-				if(balls[i].sprite.pos.vx >= SCREEN_WIDTH - 16 || balls[i].sprite.pos.vx < 0)
+				if(balls[i].sprite.pos.vx > SCREEN_WIDTH - 16 || balls[i].sprite.pos.vx < 0)
 					balls[i].dirX *= -1;
-				if(balls[i].sprite.pos.vy >= SCREEN_HEIGHT - 16 || balls[i].sprite.pos.vy < 0)
+				if(balls[i].sprite.pos.vy > SCREEN_HEIGHT - 16 || balls[i].sprite.pos.vy < 0)
 					balls[i].dirY *= -1;
 
 				balls[i].sprite.pos.vx += balls[i].dirX;
@@ -377,8 +399,9 @@ void gravity(Sprite *s, int n) {
 		sprite_anim(s, 41, 46, 1, 1, 1);
 	}
 
-	if(s->pos.vy >= SCREEN_HEIGHT+100)
+	if(s->pos.vy >= SCREEN_HEIGHT+100){
 		init_players();
+	}
 }
 
 int collision(Sprite s1, Sprite s2){
@@ -417,4 +440,8 @@ void action(Sprite *player, int i){
 			// shooot
 		}	
 	}
+}
+
+int random(int max){
+	return rand() % (max+1);
 }
