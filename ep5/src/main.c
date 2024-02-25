@@ -13,10 +13,13 @@ u_short tpages[2];
 Sprite player[2];
 char fall[2];
 int onRod[2];
+int skill[2];
 
 typedef struct {
 	Sprite sprite;
 	int dirX, dirY;
+	int skill;
+	char active;
 } BALL;
 BALL balls[n_balls];
 
@@ -131,6 +134,15 @@ void init_ball(BALL *ball){
 	ball->dirY = 1;
 }
 
+void ball_skill(BALL *ball, int skill){
+	ball->skill = skill;
+	sprite_set_uv(&ball->sprite, 32+(16*skill), 0, 16, 16);
+}
+
+void ball_spawn(BALL *ball){
+	ball->active = 1;
+}
+
 void init_rod(ROD *r) {
 	SetDrawMode(&r->dr_mode, 0, 0, GetTPage(2, 0, 768, 0), 0);
 	SetSprt(&r->sprt);
@@ -182,6 +194,7 @@ int main() {
 	//free3(cd_data);
 
 	init_ball(&balls[0]);
+	ball_spawn(&balls[0]);
 
 	onRod[0] = -1;
 	onRod[1] = -1;
@@ -209,6 +222,11 @@ int main() {
 		gravity(&player[1], 1);
 		jump(&player[0], 0);
 		jump(&player[1], 1);
+
+		if(collision(balls[0].sprite, player[0]) == 1){
+			balls[0].active = 0;
+			skill[0] = balls[0].skill;
+		}
 
 		if(collision(player[0], player[1]) == 1){
 			player[0].hitted = 10;
@@ -285,13 +303,15 @@ int main() {
 		}
 
 		for(i = 0; i < n_balls; i++){
-			if(balls[i].sprite.pos.vx >= SCREEN_WIDTH - 16 || balls[i].sprite.pos.vx < 0)
-				balls[i].dirX *= -1;
-			if(balls[i].sprite.pos.vy >= SCREEN_HEIGHT - 16 || balls[i].sprite.pos.vy < 0)
-				balls[i].dirY *= -1;
+			if(balls[i].active == 1){
+				if(balls[i].sprite.pos.vx >= SCREEN_WIDTH - 16 || balls[i].sprite.pos.vx < 0)
+					balls[i].dirX *= -1;
+				if(balls[i].sprite.pos.vy >= SCREEN_HEIGHT - 16 || balls[i].sprite.pos.vy < 0)
+					balls[i].dirY *= -1;
 
-			balls[i].sprite.pos.vx += balls[i].dirX;
-			balls[i].sprite.pos.vy += balls[i].dirY;
+				balls[i].sprite.pos.vx += balls[i].dirX;
+				balls[i].sprite.pos.vy += balls[i].dirY;
+			}
 		}
 
 		// =============== 
@@ -299,8 +319,10 @@ int main() {
 		// =============== 
 
 		//FntPrint("hello world");
-		for(i = 0; i < n_balls; i++)
-			drawSprite_2d(&balls[i].sprite);
+		for(i = 0; i < n_balls; i++){
+			if(balls[i].active == 1)
+				drawSprite_2d(&balls[i].sprite);
+		}
 
 		drawSprite_2d(&player[0]);
 		drawSprite_2d(&player[1]);
@@ -386,5 +408,13 @@ void jump(Sprite *player, int i){
 			player->pos.vx -= player->sideJump_speed;
 		if (player->isJumping == 3)
 			player->pos.vx += player->sideJump_speed;
+	}
+}
+
+void action(Sprite *player, int i){
+	if((opad[i] & PADLcross) == 0 && pad[i] & PADLcross){
+		if(skill[i] == 1){
+			// shooot
+		}	
 	}
 }
