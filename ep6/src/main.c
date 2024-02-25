@@ -7,14 +7,17 @@
 #define GRAVITY 2 
 #define JUMP_SPEED 10 
 #define JUMP_FRICTION 0.9 
-#define n_balls 1 
+#define n_balls 2 
 
 u_long *cd_data[2];
 u_short tpages[2];
 Sprite player[2];
+int points[2];
 char fall[2];
 int onRod[2];
 int skill[2];
+int spawner_timer;
+int spawner_i;
 
 typedef enum {
 	GUN = 0,
@@ -46,6 +49,8 @@ void gravity(Sprite *s, int n);
 int collision(Sprite s1, Sprite s2);
 void jump(Sprite *player, int i);
 int random(int max);
+void playerDead(int n);
+void balls_spawner();
 
 void init_block(BLOCK *b) {
 	SetDrawMode(&b->dr_mode, 0, 0, GetTPage(2, 0, 768, 0), 0);
@@ -200,6 +205,7 @@ void init_rods() {
 }
 
 int main() {
+	int i = 0;
 	psSetup();
 	cd_open();
 	cd_read_file("PLAYER1.TIM", &cd_data[0]);
@@ -210,8 +216,8 @@ int main() {
 	tpages[1] = loadToVRAM(cd_data[1]);
 	//free3(cd_data);
 
-	init_ball(&balls[0]);
-	ball_spawn(&balls[0]);
+	for(i = 0; i < n_balls; i++)
+		init_ball(&balls[i]);
 
 	onRod[0] = -1;
 	onRod[1] = -1;
@@ -235,6 +241,7 @@ int main() {
 		int ii = 0;
 		psClear();
 	
+		balls_spawner();
 		gravity(&player[0], 0);
 		gravity(&player[1], 1);
 		jump(&player[0], 0);
@@ -243,9 +250,8 @@ int main() {
 		for(i = 0; i < n_balls; i++){
 			for(k = 0; k < 2; k++){
 				if(collision(balls[i].sprite, player[k]) == 1){
-					balls[i].active = 0;
 					skill[k] = balls[i].skill;
-					ball_spawn(&balls[0]);
+					balls[i].active = 0;
 				}
 			}
 		}
@@ -340,7 +346,7 @@ int main() {
 		// 	DRAW
 		// =============== 
 
-		//FntPrint("hello world");
+		FntPrint("%d									%d", points[0], points[1]);
 		for(i = 0; i < n_balls; i++){
 			if(balls[i].active == 1)
 				drawSprite_2d(&balls[i].sprite);
@@ -399,9 +405,8 @@ void gravity(Sprite *s, int n) {
 		sprite_anim(s, 41, 46, 1, 1, 1);
 	}
 
-	if(s->pos.vy >= SCREEN_HEIGHT+100){
-		init_players();
-	}
+	if(s->pos.vy >= SCREEN_HEIGHT+100)
+		playerDead(n);
 }
 
 int collision(Sprite s1, Sprite s2){
@@ -436,12 +441,38 @@ void jump(Sprite *player, int i){
 
 void action(Sprite *player, int i){
 	if((opad[i] & PADLcross) == 0 && pad[i] & PADLcross){
-		if(skill[i] == 1){
-			// shooot
+		if(skill[i] == GUN){
+			// shoot
 		}	
 	}
 }
 
+void balls_spawner(){
+	spawner_timer++;
+	if(spawner_timer >= 100){
+		spawner_timer = 0;
+		if(spawner_i >= n_balls)
+			spawner_i = 0;
+		if(balls[spawner_i].active == 0)
+			ball_spawn(&balls[spawner_i]);	
+		spawner_i++;
+	}
+
+}
+
 int random(int max){
 	return rand() % (max+1);
+}
+
+void disable_balls(){
+	int i;
+	for(i = 0; i < n_balls; i++)
+		balls[i].active = 0;
+}
+
+void playerDead(int n){
+	init_players();
+	// if p1 is dead, set points++ for p2, and vice versa
+	points[(n+1) % 2]++;
+	disable_balls();
 }
