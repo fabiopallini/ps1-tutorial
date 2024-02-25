@@ -16,12 +16,12 @@ int points[2];
 char die[2];
 char fall[2];
 int onRod[2];
-int skill[2];
+u_char skill[2];
 int spawner_timer;
 int spawner_i;
 
 typedef enum {
-	GUN = 0,
+	GUN = 1,
 	SHOCK,	
 } SKILL;
 
@@ -52,6 +52,7 @@ void jump(Sprite *player, int i);
 int random(int max);
 void playerDead(int n);
 void balls_spawner();
+void skills_action(Sprite *player, int i);
 
 void init_block(BLOCK *b) {
 	SetDrawMode(&b->dr_mode, 0, 0, GetTPage(2, 0, 768, 0), 0);
@@ -147,10 +148,10 @@ void init_ball(BALL *ball){
 }
 
 void ball_spawn(BALL *ball){
-	int r = random(1);
+	int r = random(1)+1;
 	int pos = random(2);
 	ball->skill = r;
-	sprite_set_uv(&ball->sprite, 32+(16*ball->skill), 0, 16, 16);
+	sprite_set_uv(&ball->sprite, 32+(16*(ball->skill-1)), 0, 16, 16);
 	if(pos == 0){
 		ball->sprite.pos.vx = 0;
 		ball->sprite.pos.vy = SCREEN_HEIGHT / 2;
@@ -262,14 +263,14 @@ int main() {
 			{
 				if(skill[0] == SHOCK && skill[1] != SHOCK)
 				{
-					//skill[0] = 0; 
+					skill[0] = 0; 
 					die[1] = 10;
 					player[1].hitted = 10;
 					onRod[1] = -1;
 					fall[1] = 0;
 				}
 				else if(skill[1] == SHOCK && skill[0] != SHOCK){
-					//skill[1] = 0; 
+					skill[1] = 0; 
 					die[0] = 10;
 					player[0].hitted = 10;
 					onRod[0] = -1;
@@ -307,7 +308,8 @@ int main() {
 				sprite_set_uv(&player[i], 41*5, 46, 41, 46);
 			}
 			// PLAYER 1-2 INPUT
-			if(player[i].hitted <= 0 && fall[i] == 0 && onRod[i] == -1) {
+			skills_action(&player[i], i);
+			if(player[i].action == 0 && player[i].hitted <= 0 && fall[i] == 0 && onRod[i] == -1) {
 				if((pad[i] & PADLleft) == 0 && (pad[i] & PADLright) == 0)
 					sprite_set_uv(&player[i], 0, 46*1, 41, 46);
 					
@@ -460,12 +462,18 @@ void jump(Sprite *player, int i){
 	}
 }
 
-void action(Sprite *player, int i){
-	if((opad[i] & PADLcross) == 0 && pad[i] & PADLcross){
-		if(skill[i] == GUN){
-			// shoot
-		}	
+void skills_action(Sprite *player, int i){
+	if(player->action == 0 && (opad[i] & PADLcross) == 0 && pad[i] & PADLcross){
+		if(player->hitted <= 0 && fall[i] == 0 && onRod[i] == -1) {
+			if(skill[i] == GUN){
+				player->action = skill[i];
+				skill[i] = 0;
+			}
+		}
 	}
+	if(player->action == GUN)
+		if(sprite_anim(player, 41, 46, 1, 2, 3) == 0)
+			player->action = 0;
 }
 
 void balls_spawner(){
