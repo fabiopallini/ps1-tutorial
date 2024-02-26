@@ -12,6 +12,7 @@
 u_long *cd_data[2];
 u_short tpages[2];
 Sprite player[2];
+Sprite bullet[2];
 int points[2];
 char die[2];
 char fall[2];
@@ -50,6 +51,7 @@ void gravity(Sprite *s, int n);
 int collision(Sprite s1, Sprite s2);
 void jump(Sprite *player, int i);
 int random(int max);
+void playerDie(Sprite *p, int i);
 void playerDead(int n);
 void balls_spawner();
 void skills_action(Sprite *player, int i);
@@ -184,6 +186,12 @@ void init_players() {
 		player[i].direction = 1;
 		sprite_set_uv(&player[i], 41, 0, 41, 46);
 		player[i].pos.vy = blocks[n_blocks-1].sprt.y0-player[i].h-10;
+
+		sprite_init(&bullet[i], 5, 1, tpages[1]);
+		bullet[i].direction = 0;
+		sprite_set_uv(&bullet[i], 23, 0, 5, 1);
+		bullet[i].pos.vx = -100;
+		bullet[i].pos.vy = -100;
 	}
 	player[0].pos.vx = 35;
 	player[1].pos.vx = SCREEN_WIDTH - 100; 
@@ -251,9 +259,10 @@ int main() {
 
 		for(i = 0; i < n_balls; i++){
 			for(k = 0; k < 2; k++){
-				if(collision(balls[i].sprite, player[k]) == 1){
+				if(balls[i].active == 1 && collision(balls[i].sprite, player[k]) == 1){
 					skill[k] = balls[i].skill;
 					balls[i].active = 0;
+					break;
 				}
 			}
 		}
@@ -287,14 +296,29 @@ int main() {
 				}
 			}
 		}
-		
+
 		for(i = 0; i < 2; i++)
 		{
+			int inv = (i+1)%2;
+			if(bullet[i].direction == 1 && bullet[i].pos.vx <= SCREEN_WIDTH)
+				bullet[i].pos.vx += 4;
+			if(bullet[i].direction == 0 && bullet[i].pos.vx + bullet[i].w >= 0)
+				bullet[i].pos.vx -= 4;
+
+			if(bullet[i].pos.vx + bullet[i].w >= player[inv].pos.vx &&
+				bullet[i].pos.vx <= player[inv].pos.vx + player[inv].w &&
+				bullet[i].pos.vy + bullet[i].h >= player[inv].pos.vy &&
+				bullet[i].pos.vy <= player[inv].pos.vy + player[inv].h){
+				playerDie(&player[inv], inv);
+				bullet[i].pos.vx = -100;
+			}
+
 			if(die[i] > 0){
 				die[i]--;
 				if(die[i] <= 0)
-					playerDead(1);
+					playerDead(i);
 			}
+
 			if(player[i].hitted > 0){
 				player[i].hitted -= 1;
 				if(player[i].pos.vx <= player[(i+1)%2].pos.vx){
@@ -307,6 +331,7 @@ int main() {
 				}
 				sprite_set_uv(&player[i], 41*5, 46, 41, 46);
 			}
+
 			// PLAYER 1-2 INPUT
 			skills_action(&player[i], i);
 			if(player[i].action == 0 && player[i].hitted <= 0 && fall[i] == 0 && onRod[i] == -1) {
@@ -377,6 +402,8 @@ int main() {
 
 		drawSprite_2d(&player[0]);
 		drawSprite_2d(&player[1]);
+		drawSprite_2d(&bullet[0]);
+		drawSprite_2d(&bullet[1]);
 
 		for(k = 0; k < n_rods; k++){
 			for(i = 0; i < rods_length[k]; i++)
@@ -468,6 +495,13 @@ void skills_action(Sprite *player, int i){
 			if(skill[i] == GUN){
 				player->action = skill[i];
 				skill[i] = 0;
+				bullet[i].direction = player->direction;
+				sprite_set_uv(&bullet[i], 23, 0, 5, 1);
+				if(player->direction == 1)
+					bullet[i].pos.vx = player->pos.vx + 39;
+				if(player->direction == 0)
+					bullet[i].pos.vx = player->pos.vx - 39;
+				bullet[i].pos.vy = player->pos.vy + 17;
 			}
 		}
 	}
@@ -497,6 +531,13 @@ void disable_balls(){
 	int i;
 	for(i = 0; i < n_balls; i++)
 		balls[i].active = 0;
+}
+
+void playerDie(Sprite *p, int i){
+	die[i] = 10;
+	p->hitted = 10;
+	onRod[i] = -1;
+	fall[i] = 0;
 }
 
 void playerDead(int n){
