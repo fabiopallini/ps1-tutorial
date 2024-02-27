@@ -248,7 +248,6 @@ int main() {
 
 	audio_init();
 	audio_vag_to_spu((u_char*)cd_data[2], 27056, SPU_0CH);
-	audio_play(SPU_0CH);
 
 	while(1) {
 		int k = 0;
@@ -498,6 +497,7 @@ void skills_action(Sprite *player, int i){
 	if(player->action == 0 && (opad[i] & PADLcross) == 0 && pad[i] & PADLcross){
 		if(player->hitted <= 0 && fall[i] == 0 && onRod[i] == -1) {
 			if(skill[i] == GUN){
+				audio_play(SPU_0CH);
 				player->action = skill[i];
 				skill[i] = 0;
 				bullet[i].direction = player->direction;
