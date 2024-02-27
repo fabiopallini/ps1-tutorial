@@ -9,7 +9,7 @@
 #define JUMP_FRICTION 0.9 
 #define n_balls 2 
 
-u_long *cd_data[2];
+u_long *cd_data[3];
 u_short tpages[2];
 Sprite player[2];
 Sprite bullet[2];
@@ -220,6 +220,7 @@ int main() {
 	cd_open();
 	cd_read_file("PLAYER1.TIM", &cd_data[0]);
 	cd_read_file("GFX1.TIM", &cd_data[1]);
+	cd_read_file("LASER.VAG", &cd_data[2]);
 	cd_close();
 	
 	tpages[0] = loadToVRAM(cd_data[0]);
@@ -244,6 +245,10 @@ int main() {
 	init_map();
 	init_players();
 	init_rods();
+
+	audio_init();
+	audio_vag_to_spu((u_char*)cd_data[2], 27056, SPU_0CH);
+	audio_play(SPU_0CH);
 
 	while(1) {
 		int k = 0;

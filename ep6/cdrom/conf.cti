@@ -57,6 +57,11 @@ Disc CDROMXA_PSX ;the disk format
 						Source [root]\data\GFX1.TIM
 					EndFile
 
+					File LASER.VAG
+						XAFileAttributes Form1 Data
+						Source [root]\data\LASER.VAG
+					EndFile
+
 					;Directory XA ;make a new directory called XA and put the files below in it
 						;File FINAL.XA
 							;XAFileAttributes Form2 Data

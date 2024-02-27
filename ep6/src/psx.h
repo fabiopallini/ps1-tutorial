@@ -65,4 +65,9 @@ void drawSprite_2d(Sprite *sprite);
 void drawSprite_2d_rgb(Sprite *sprite);
 void drawSprt(DR_MODE *dr_mode, SPRT *sprt);
 
+void audio_init();
+void audio_vag_to_spu(u_char* sound_data, u_long sound_size, int voice_channel);
+void audio_play(int voice_channel);
+void audio_free(unsigned long spu_address);
+
 #endif
