@@ -24,6 +24,7 @@ int spawner_i;
 typedef enum {
 	GUN = 1,
 	SHOCK,	
+	DEATH,
 } SKILL;
 
 typedef struct {
@@ -150,7 +151,7 @@ void init_ball(BALL *ball){
 }
 
 void ball_spawn(BALL *ball){
-	int r = random(1)+1;
+	int r = random(2)+1;
 	int pos = random(2);
 	ball->skill = r;
 	sprite_set_uv(&ball->sprite, 32+(16*(ball->skill-1)), 0, 16, 16);
@@ -266,6 +267,8 @@ int main() {
 				if(balls[i].active == 1 && collision(balls[i].sprite, player[k]) == 1){
 					skill[k] = balls[i].skill;
 					balls[i].active = 0;
+					if(skill[k] == DEATH)
+						playerDie(&player[k], k);			
 					break;
 				}
 			}
