@@ -25,7 +25,7 @@ typedef struct
 	SVECTOR rot; 
 	char prevFrame, prevRow, frame, frameTime, jump_speed, frameInterval;
 	u_char direction, isJumping, hitted, shooting, action;
-	char sideJump_speed;
+	float sideJump_speed;
 	int hittable;
 	int hp, hp_max;
 	

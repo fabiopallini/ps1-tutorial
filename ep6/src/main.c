@@ -151,8 +151,11 @@ void init_ball(BALL *ball){
 }
 
 void ball_spawn(BALL *ball){
-	int r = random(2)+1;
-	int pos = random(2);
+	int r, pos;
+	//srand(1);
+	// The first skill is 1, so the random number must be at least 1 (random(..) + 1) 
+	r = random(2)+1;
+	pos = random(2);
 	ball->skill = r;
 	sprite_set_uv(&ball->sprite, 32+(16*(ball->skill-1)), 0, 16, 16);
 	if(pos == 0){
@@ -476,23 +479,26 @@ int collision(Sprite s1, Sprite s2){
 }
 
 void jump(Sprite *player, int i){
-	if(fall[i] == 0 && onRod[i] == -1 && (opad[i] & PADLsquare) == 0 && pad[i] & PADLsquare){
+	if(player->isJumping == 0 && fall[i] == 0 && onRod[i] == -1 && (opad[i] & PADLsquare) == 0 && pad[i] & PADLsquare){
 		player->isJumping = 1;
 		if(pad[i] & PADLleft)
 			player->isJumping = 2;
 		if(pad[i] & PADLright)
 			player->isJumping = 3;
 		player->jump_speed = JUMP_SPEED;
-		player->sideJump_speed = 8;
+		player->sideJump_speed = 3;
 	}
 	if(player->isJumping > 0){
 		player->pos.vy -= player->jump_speed;
 		player->jump_speed *= JUMP_FRICTION;
-		player->sideJump_speed *= 0.9;
-		if (player->isJumping == 2)
+		if (player->isJumping == 2){
 			player->pos.vx -= player->sideJump_speed;
-		if (player->isJumping == 3)
+			player->sideJump_speed *= 0.88;
+		}
+		if (player->isJumping == 3){
 			player->pos.vx += player->sideJump_speed;
+			player->sideJump_speed *= 0.95;
+		}
 	}
 }
 
