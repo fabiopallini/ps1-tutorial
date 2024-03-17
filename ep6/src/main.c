@@ -85,7 +85,6 @@ void init_map() {
 	int col[3];
 	block_index = 0;
 
-	//srand(5419);
 	if(firstStart == 1){
 		firstStart = 0;
 		col[0] = 4;
@@ -96,12 +95,8 @@ void init_map() {
 	else
 		seed = player[0].pos.vx + player[0].pos.vy + player[1].pos.vx + player[1].pos.vy;
 
-	/*printf("debug\n");
-	printf("col[0] %d\n", col[0]);
-	printf("col[1] %d\n", col[1]);
-	printf("col[2] %d\n", col[2]);*/
-
 	for(row = 0; row < 4; row++){
+		int counter = 0;
 		if(seed != 0){
 			for(i = 0; i < 4; i++){
 				seed += i;
@@ -113,7 +108,8 @@ void init_map() {
 				int x = 0;
 				int y = 0;
 				int block_y = 48;
-				if(col_index <= 14){
+				counter++;
+				if(counter <= 14){
 					x = 20+plat_space+(15*k);			
 					y = block_y*(row+1);
 					init_block(&blocks[block_index]);
