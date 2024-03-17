@@ -5,9 +5,11 @@
 #define n_rods 4
 #define SPEED 1 
 #define GRAVITY 2 
-#define JUMP_SPEED 10 
+#define JUMP_SPEED 8 
 #define JUMP_FRICTION 0.9 
 #define n_balls 2 
+#define p1_start_vx 35
+#define p2_start_vx SCREEN_WIDTH - 100
 
 u_long *cd_data[3];
 u_short tpages[2];
@@ -152,7 +154,7 @@ void init_ball(BALL *ball){
 
 void ball_spawn(BALL *ball){
 	int r, pos;
-	//srand(1);
+	srand(player[0].pos.vx + player[0].pos.vy + player[1].pos.vx + player[1].pos.vy);
 	// The first skill is 1, so the random number must be at least 1 (random(..) + 1) 
 	r = random(2)+1;
 	pos = random(2);
@@ -197,8 +199,14 @@ void init_players() {
 		bullet[i].pos.vx = -100;
 		bullet[i].pos.vy = -100;
 	}
-	player[0].pos.vx = 35;
-	player[1].pos.vx = SCREEN_WIDTH - 100; 
+
+	player[0].pos.vx = p1_start_vx;
+	onRod[0] = -1;
+	fall[0] = 0;
+
+	player[1].pos.vx = p2_start_vx; 
+	onRod[1] = -1;
+	fall[1] = 0;
 }
 
 void init_rods() {
@@ -525,16 +533,18 @@ void skills_action(Sprite *player, int i){
 }
 
 void balls_spawner(){
-	spawner_timer++;
-	if(spawner_timer >= 100){
-		spawner_timer = 0;
-		if(spawner_i >= n_balls)
-			spawner_i = 0;
-		if(balls[spawner_i].active == 0)
-			ball_spawn(&balls[spawner_i]);	
-		spawner_i++;
+	if(player[0].pos.vx != p1_start_vx || player[1].pos.vx != p2_start_vx)
+	{
+		spawner_timer++;
+		if(spawner_timer >= 100){
+			spawner_timer = 0;
+			if(spawner_i >= n_balls)
+				spawner_i = 0;
+			if(balls[spawner_i].active == 0)
+				ball_spawn(&balls[spawner_i]);	
+			spawner_i++;
+		}
 	}
-
 }
 
 int random(int max){
