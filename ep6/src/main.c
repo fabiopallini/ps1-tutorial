@@ -24,6 +24,7 @@ int onRod[2];
 u_char skill[2];
 int spawner_timer;
 int spawner_i;
+char firstStart = 1;
 
 typedef enum {
 	GUN = 1,
@@ -76,22 +77,24 @@ void init_block(BLOCK *b) {
 void init_map() {
 	int i = 0;
 	int k = 0;
+	int seed = 0;
+	const int max_plat_blocks = 5;
 	int plat_space = 0;
 	int col_index = 0;
 	int row = 0;
 	int col[3];
-	srand(5419);
 	block_index = 0;
 
-	/*col[0] = random(12)+2;
-	col[1] = random(14);
-	col[2] = random(14);
-	col[3] = random(12)+2;*/
-
-	col[0] = 4;
-	col[1] = 4;
-	col[2] = 2;
-	col[3] = 4;
+	//srand(5419);
+	if(firstStart == 1){
+		firstStart = 0;
+		col[0] = 4;
+		col[1] = 4;
+		col[2] = 2;
+		col[3] = 4;
+	}
+	else
+		seed = player[0].pos.vx + player[0].pos.vy + player[1].pos.vx + player[1].pos.vy;
 
 	/*printf("debug\n");
 	printf("col[0] %d\n", col[0]);
@@ -99,6 +102,12 @@ void init_map() {
 	printf("col[2] %d\n", col[2]);*/
 
 	for(row = 0; row < 4; row++){
+		if(seed != 0){
+			for(i = 0; i < 4; i++){
+				seed += i;
+				col[i] = random(max_plat_blocks);
+			}
+		}
 		for(i = 0; i < 4; i++){
 			for(col_index = 1; col_index <= col[i]; col_index++){
 				int x = 0;
@@ -569,6 +578,7 @@ void playerDie(Sprite *p, int i){
 }
 
 void playerDead(int n){
+	init_map();
 	init_players();
 	// if p1 is dead, set points++ for p2, and vice versa
 	points[(n+1) % 2]++;
