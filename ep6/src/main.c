@@ -8,8 +8,10 @@
 #define JUMP_SPEED 8 
 #define JUMP_FRICTION 0.9 
 #define n_balls 2 
-#define p1_start_vx 35
-#define p2_start_vx SCREEN_WIDTH - 100
+#define p1_start_vx 50 
+#define p2_start_vx SCREEN_WIDTH - 80
+#define BALL_SPAWN_TIME 300
+#define BALL_LIFE_TIME 1000
 
 u_long *cd_data[3];
 u_short tpages[2];
@@ -34,6 +36,7 @@ typedef struct {
 	int dirX, dirY;
 	SKILL skill;
 	char active;
+	int life_time;
 } BALL;
 BALL balls[n_balls];
 
@@ -172,6 +175,7 @@ void ball_spawn(BALL *ball){
 		ball->sprite.pos.vx = SCREEN_WIDTH - ball->sprite.w;
 		ball->sprite.pos.vy = SCREEN_HEIGHT / 2;
 	}
+	ball->life_time = BALL_LIFE_TIME;
 	ball->active = 1;
 }
 
@@ -190,6 +194,7 @@ void init_players() {
 	for(i = 0; i <= 1; i++){
 		sprite_init(&player[i], 31, 36, tpages[0]);
 		player[i].direction = 1;
+		player[i].hitted = 0;
 		sprite_set_uv(&player[i], 41, 0, 41, 46);
 		player[i].pos.vy = blocks[n_blocks-1].sprt.y0-player[i].h-10;
 
@@ -273,8 +278,27 @@ int main() {
 		jump(&player[0], 0);
 		jump(&player[1], 1);
 
-		for(i = 0; i < n_balls; i++){
-			for(k = 0; k < 2; k++){
+		for(i = 0; i < n_balls; i++)
+		{
+			if(balls[i].active == 1)
+			{
+				balls[i].life_time -= 1;
+				if(balls[i].life_time > 0)
+				{
+					if(balls[i].sprite.pos.vx > SCREEN_WIDTH - 16 || balls[i].sprite.pos.vx < 0)
+						balls[i].dirX *= -1;
+					if(balls[i].sprite.pos.vy > SCREEN_HEIGHT - 16 || balls[i].sprite.pos.vy < 0)
+						balls[i].dirY *= -1;
+				}
+
+				balls[i].sprite.pos.vx += balls[i].dirX;
+				balls[i].sprite.pos.vy += balls[i].dirY;
+			}
+			if(balls[i].life_time < -300)
+				balls[i].active = 0;
+			// loop players to check collision
+			for(k = 0; k < 2; k++)
+			{
 				if(balls[i].active == 1 && collision(balls[i].sprite, player[k]) == 1){
 					skill[k] = balls[i].skill;
 					balls[i].active = 0;
@@ -393,18 +417,6 @@ int main() {
 					player[i].direction = 1;
 					sprite_set_uv(&player[i], 41, 46, 41, 46);
 				}
-			}
-		}
-
-		for(i = 0; i < n_balls; i++){
-			if(balls[i].active == 1){
-				if(balls[i].sprite.pos.vx > SCREEN_WIDTH - 16 || balls[i].sprite.pos.vx < 0)
-					balls[i].dirX *= -1;
-				if(balls[i].sprite.pos.vy > SCREEN_HEIGHT - 16 || balls[i].sprite.pos.vy < 0)
-					balls[i].dirY *= -1;
-
-				balls[i].sprite.pos.vx += balls[i].dirX;
-				balls[i].sprite.pos.vy += balls[i].dirY;
 			}
 		}
 
@@ -536,7 +548,7 @@ void balls_spawner(){
 	if(player[0].pos.vx != p1_start_vx || player[1].pos.vx != p2_start_vx)
 	{
 		spawner_timer++;
-		if(spawner_timer >= 100){
+		if(spawner_timer >= BALL_SPAWN_TIME){
 			spawner_timer = 0;
 			if(spawner_i >= n_balls)
 				spawner_i = 0;
@@ -553,6 +565,7 @@ int random(int max){
 
 void disable_balls(){
 	int i;
+	spawner_timer = 0;
 	for(i = 0; i < n_balls; i++)
 		balls[i].active = 0;
 }
