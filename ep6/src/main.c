@@ -1,7 +1,7 @@
 #include "psx.h"
 #include "rand.h"
 
-#define n_blocks 55
+#define n_blocks 65 
 #define n_rods 4
 #define SPEED 1 
 #define GRAVITY 2 
@@ -45,6 +45,7 @@ typedef struct {
 	SPRT sprt;
 } BLOCK;
 BLOCK blocks[n_blocks];
+int block_index = 0;
 
 typedef struct {
 	DR_MODE dr_mode;
@@ -75,76 +76,66 @@ void init_block(BLOCK *b) {
 void init_map() {
 	int i = 0;
 	int k = 0;
-	for(i = 0; i < n_blocks; i++){
+	int plat_space = 0;
+	int col_index = 0;
+	int row = 0;
+	int col[3];
+	srand(5419);
+	block_index = 0;
+
+	/*col[0] = random(12)+2;
+	col[1] = random(14);
+	col[2] = random(14);
+	col[3] = random(12)+2;*/
+
+	col[0] = 4;
+	col[1] = 4;
+	col[2] = 2;
+	col[3] = 4;
+
+	/*printf("debug\n");
+	printf("col[0] %d\n", col[0]);
+	printf("col[1] %d\n", col[1]);
+	printf("col[2] %d\n", col[2]);*/
+
+	for(row = 0; row < 4; row++){
+		for(i = 0; i < 4; i++){
+			for(col_index = 1; col_index <= col[i]; col_index++){
+				int x = 0;
+				int y = 0;
+				int block_y = 48;
+				if(col_index <= 14){
+					x = 20+plat_space+(15*k);			
+					y = block_y*(row+1);
+					init_block(&blocks[block_index]);
+					setXY0(&blocks[block_index].sprt, x, y);
+					k++;
+					block_index++;
+				}
+			}
+			plat_space += 25; // space between platforms
+		}
+		k = 0;
+		plat_space = 0;
+	}
+
+	// ROW 5
+	k = 0;
+	for(i = 0; i < 8; i++){
 		int x = 0;
 		int y = 0;
 		int block_y = 48;
-		init_block(&blocks[i]);
-
-		if(i <= 3){
-			x = 40+(15*i); 
-			y = block_y*1;
-		}
-		if(i >= 4 && i <= 7){
-			x = SCREEN_WIDTH-(15*i); 
-			y = block_y*1;
-		}
-
-		if(i >= 8 && i <= 13){
-			x = 10+(15*k++);
-			y = block_y*2;
-		}
-		if(i >= 14 && i <= 17){
-			x = 40+(15*k++); 
-			y = block_y*2;
-		}
-		if(i >= 18 && i <= 21){
-			x = 65+(15*k++); 
-			y = block_y*2;
-		}
-
-		if(i == 22)
-			k = 0;
-		if(i >= 22 && i <= 28){
-			x = 25+(15*k++); 
-			y = block_y*3;
-		}
-		if(i >= 29 && i <= 32){
-			x = 45+(15*k++); 
-			y = block_y*3;
-		}
-
-		if(i == 33)
-			k = 0;
-		if(i >= 33 && i <= 35){
-			x = 15+(15*k++); 
-			y = block_y*4;
-		}
-		if(i >= 36 && i <= 37){
-			x = 35+(15*k++);
-		 	y = block_y*4;
-		}
-		if(i >= 38 && i <= 43){
-			x = 55+(15*k++); 
-			y =  block_y*4;
-		}
-		if(i >= 44 && i <= 46){
-			x = 75+(15*k++);
-			y = block_y*4;
-		}
-
-		if(i == 47)
-			k = 0;
-		if(i >= 47 && i <= 50){
+		init_block(&blocks[block_index]);
+		if(i < 4){
 			x = 35+(15*k++);
 			y = block_y*5;
 		}
-		if(i >= 51 && i <= 54){
+		else{
 			x = SCREEN_WIDTH-(15*k++);
 			y = block_y*5;
 		}
-		
-		setXY0(&blocks[i].sprt, x, y);
+		setXY0(&blocks[block_index].sprt, x, y);
+		block_index++;
 	}
 }
 
@@ -196,7 +187,7 @@ void init_players() {
 		player[i].direction = 1;
 		player[i].hitted = 0;
 		sprite_set_uv(&player[i], 41, 0, 41, 46);
-		player[i].pos.vy = blocks[n_blocks-1].sprt.y0-player[i].h-10;
+		player[i].pos.vy = blocks[block_index-1].sprt.y0-player[i].h-10;
 
 		sprite_init(&bullet[i], 5, 1, tpages[1]);
 		bullet[i].direction = 0;
@@ -222,7 +213,7 @@ void init_rods() {
 			if(k == 0)
 				setXY0(&rods[k][i].sprt, 50, (48*5)-16-(i*16));
 			if(k == 1)
-				setXY0(&rods[k][i].sprt, 90, (48*4)-16-(i*16));
+				setXY0(&rods[k][i].sprt, 110, (48*4)-16-(i*16));
 			if(k == 2)
 				setXY0(&rods[k][i].sprt, 240, (48*5)-16-(i*16));
 			if(k == 3)
