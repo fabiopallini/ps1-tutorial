@@ -490,10 +490,11 @@ void gravity(Sprite *s, int n) {
 }
 
 int collision(Sprite s1, Sprite s2){
-	if(s1.pos.vx + s1.w/2 > s2.pos.vx && 
-	s1.pos.vx < s2.pos.vx + s2.w/2 &&
-	s1.pos.vy + s1.h/2 > s2.pos.vy &&
-	s1.pos.vy < s2.pos.vy + s2.h/2)
+	int m = 15;
+	if(s1.pos.vx + s1.w > s2.pos.vx + m && 
+	s1.pos.vx < s2.pos.vx + s2.w - m &&
+	s1.pos.vy + s1.h > s2.pos.vy + m &&
+	s1.pos.vy < s2.pos.vy + s2.h)
 		return 1;
 	return 0;
 }
