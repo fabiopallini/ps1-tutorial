@@ -101,8 +101,11 @@ void init_map() {
 			for(i = 0; i < 4; i++){
 				seed += i;
 				col[i] = random(max_plat_blocks);
+				//printf("col[%d] %d\n", i, col[i]);
 			}
 		}
+		//printf("row %d\n", row);
+		// columns
 		for(i = 0; i < 4; i++){
 			for(col_index = 1; col_index <= col[i]; col_index++){
 				int x = 0;
@@ -111,6 +114,7 @@ void init_map() {
 				counter++;
 				if(counter <= 14){
 					x = 20+plat_space+(15*k);			
+					//printf("col_index:%d x:%d k:%d \n", col_index, x, k);
 					y = block_y*(row+1);
 					init_block(&blocks[block_index]);
 					setXY0(&blocks[block_index].sprt, x, y);
@@ -451,7 +455,7 @@ int main() {
 			}
 		}
 
-		for(i = 0; i < n_blocks; i++)
+		for(i = 0; i < block_index; i++)
 			drawSprt(&blocks[i].dr_mode, &blocks[i].sprt);
 
 		psDisplay();
@@ -464,7 +468,7 @@ void gravity(Sprite *s, int n) {
 	int i = 0;
 	int margin = 10;
 	fall[n] = 1; // falling down
-	for(i = 0; i < n_blocks; i++){
+	for(i = 0; i < block_index; i++){
 		if(s->pos.vx + (s->w-margin) >= blocks[i].sprt.x0 && 
 		s->pos.vx + margin <= blocks[i].sprt.x0 + blocks[i].sprt.w &&
 		s->pos.vy + s->h >= blocks[i].sprt.y0 && 
