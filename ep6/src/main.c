@@ -11,7 +11,7 @@
 #define p1_start_vx 50 
 #define p2_start_vx SCREEN_WIDTH - 80
 #define BALL_SPAWN_TIME 200
-#define BALL_LIFE_TIME 700
+#define BALL_LIFE_TIME 600
 
 u_long *cd_data[3];
 u_short tpages[2];
@@ -87,11 +87,11 @@ void init_map() {
 	int rod_i;
 	block_index = 0;
 
-	for(rod_i = 0; rod_i < rods_length[2]; rod_i++){
-		setXY0(&rods[2][rod_i].sprt, -100, -100);
-	}
-	for(rod_i = 0; rod_i < rods_length[3]; rod_i++){
-		setXY0(&rods[3][rod_i].sprt, -100, -100);
+	// reset random rods position out of camera
+	for(i = 2; i < n_rods; i++){
+		for(rod_i = 0; rod_i < rods_length[i]; rod_i++){
+			setXY0(&rods[i][rod_i].sprt, -100, -100);
+		}
 	}
 
 	if(firstStart == 1){
@@ -243,7 +243,7 @@ void init_players() {
 	fall[1] = 0;
 }
 
-void init_base_rods() {
+void init_rods() {
 	int k, i;
 	for(k = 0; k < n_rods; k++){
 		for(i = 0; i < rods_length[k]; i++){
@@ -274,19 +274,14 @@ int main() {
 
 	onRod[0] = -1;
 	onRod[1] = -1;
-	//rods_length[0] = 5;
-	//rods_length[0] = 8;
-	//rods_length[0] = 11;
-	//rods_length[0] = 14;
-	//
 	rods_length[0] = 14;
 	rods_length[1] = 14;
-	rods_length[2] = 5;
-	rods_length[3] = 5;
+	rods_length[2] = 8;
+	rods_length[3] = 8;
 
 	init_map();
 	init_players();
-	init_base_rods();
+	init_rods();
 
 	audio_init();
 	audio_vag_to_spu((u_char*)cd_data[2], 27056, SPU_0CH);
@@ -466,7 +461,7 @@ int main() {
 				drawSprt(&rods[k][i].dr_mode, &rods[k][i].sprt);
 				// check rod collision
 				for(ii = 0; ii < 2; ii++){
-					if(pad[ii] & PADLup || pad[ii] & PADLdown){
+					if(player[ii].isJumping == 0 && (pad[ii] & PADLup || pad[ii] & PADLdown)){
 						if(player[ii].pos.vx + (player[ii].w-10) >= rods[k][i].sprt.x0 && 
 						player[ii].pos.vx + 10 <= rods[k][i].sprt.x0 + rods[k][i].sprt.w &&
 						player[ii].pos.vy + player[ii].h >= rods[k][i].sprt.y0 &&
