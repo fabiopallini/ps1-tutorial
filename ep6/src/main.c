@@ -10,7 +10,7 @@
 #define n_balls 2 
 #define p1_start_vx 50 
 #define p2_start_vx SCREEN_WIDTH - 80
-#define BALL_SPAWN_TIME 200
+#define BALL_SPAWN_TIME 100
 #define BALL_LIFE_TIME 600
 
 u_long *cd_data[3];
