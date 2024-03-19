@@ -2,7 +2,7 @@
 #include "rand.h"
 
 #define n_blocks 65 
-#define n_rods 6 
+#define n_rods 4 
 #define SPEED 1 
 #define GRAVITY 2 
 #define JUMP_SPEED 8 
@@ -10,8 +10,8 @@
 #define n_balls 2 
 #define p1_start_vx 50 
 #define p2_start_vx SCREEN_WIDTH - 80
-#define BALL_SPAWN_TIME 300
-#define BALL_LIFE_TIME 1000
+#define BALL_SPAWN_TIME 200
+#define BALL_LIFE_TIME 700
 
 u_long *cd_data[3];
 u_short tpages[2];
@@ -63,6 +63,7 @@ void playerDie(Sprite *p, int i);
 void playerDead(int n);
 void balls_spawner();
 void skills_action(Sprite *player, int i);
+void init_rod(ROD *r);
 
 void init_block(BLOCK *b) {
 	SetDrawMode(&b->dr_mode, 0, 0, GetTPage(2, 0, 768, 0), 0);
@@ -83,7 +84,15 @@ void init_map() {
 	int col_index = 0;
 	int row = 0;
 	int col[3];
+	int rod_i;
 	block_index = 0;
+
+	for(rod_i = 0; rod_i < rods_length[2]; rod_i++){
+		setXY0(&rods[2][rod_i].sprt, -100, -100);
+	}
+	for(rod_i = 0; rod_i < rods_length[3]; rod_i++){
+		setXY0(&rods[3][rod_i].sprt, -100, -100);
+	}
 
 	if(firstStart == 1){
 		firstStart = 0;
@@ -97,7 +106,14 @@ void init_map() {
 
 	for(row = 0; row < 4; row++){
 		int counter = 0;
-		if(seed != 0){
+		// first row is always the same as the last one
+		if(row == 0){
+			col[0] = 4;
+			col[1] = 2;
+			col[2] = 2;
+			col[3] = 4;
+		}
+		if(row > 0 && seed != 0){
 			for(i = 0; i < 4; i++){
 				seed += i;
 				col[i] = random(max_plat_blocks);
@@ -120,6 +136,19 @@ void init_map() {
 					setXY0(&blocks[block_index].sprt, x, y);
 					k++;
 					block_index++;
+
+					if(row == 3 && col_index == (col[i]/2)+1){
+						if(i == 1){
+							for(rod_i = 0; rod_i < rods_length[2]; rod_i++){
+								setXY0(&rods[2][rod_i].sprt, x+6, y-16-(rod_i*16));
+							}
+						}
+						if(i == 2){
+							for(rod_i = 0; rod_i < rods_length[3]; rod_i++){
+								setXY0(&rods[3][rod_i].sprt, x+6, y-16-(rod_i*16));
+							}
+						}
+					}
 				}
 			}
 			plat_space += 25; // space between platforms
@@ -128,7 +157,7 @@ void init_map() {
 		plat_space = 0;
 	}
 
-	// ROW 5
+	// ROW 5 (last one)
 	k = 0;
 	for(i = 0; i < 8; i++){
 		int x = 0;
@@ -214,7 +243,7 @@ void init_players() {
 	fall[1] = 0;
 }
 
-void init_rods() {
+void init_base_rods() {
 	int k, i;
 	for(k = 0; k < n_rods; k++){
 		for(i = 0; i < rods_length[k]; i++){
@@ -223,10 +252,6 @@ void init_rods() {
 				setXY0(&rods[k][i].sprt, 50, (48*5)-16-(i*16));
 			if(k == 1)
 				setXY0(&rods[k][i].sprt, 240, (48*5)-16-(i*16));
-			if(k == 2)
-				setXY0(&rods[k][i].sprt, 110, (48*4)-16-(i*16));
-			if(k == 3)
-				setXY0(&rods[k][i].sprt, 200, (48*4)-16-(i*16));
 		}
 	}
 }
@@ -261,7 +286,7 @@ int main() {
 
 	init_map();
 	init_players();
-	init_rods();
+	init_base_rods();
 
 	audio_init();
 	audio_vag_to_spu((u_char*)cd_data[2], 27056, SPU_0CH);
