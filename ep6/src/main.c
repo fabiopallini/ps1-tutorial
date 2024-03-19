@@ -218,29 +218,37 @@ void init_rod(ROD *r) {
 	setRGB0(&r->sprt, 255, 255, 255);
 }
 
-void init_players() {
+void reset_players(){
 	int i;
 	for(i = 0; i <= 1; i++){
-		sprite_init(&player[i], 31, 36, tpages[0]);
 		player[i].direction = (i+1)%2;
 		player[i].hitted = 0;
 		sprite_set_uv(&player[i], 41, 0, 41, 46);
 		player[i].pos.vy = blocks[block_index-1].sprt.y0-player[i].h-10;
 
-		sprite_init(&bullet[i], 5, 1, tpages[1]);
 		bullet[i].direction = 0;
 		sprite_set_uv(&bullet[i], 23, 0, 5, 1);
 		bullet[i].pos.vx = -100;
 		bullet[i].pos.vy = -100;
 	}
-
 	player[0].pos.vx = p1_start_vx;
 	onRod[0] = -1;
 	fall[0] = 0;
+	skill[0] = 0;
 
 	player[1].pos.vx = p2_start_vx; 
 	onRod[1] = -1;
 	fall[1] = 0;
+	skill[1] = 0;
+}
+
+void init_players() {
+	int i;
+	for(i = 0; i <= 1; i++){
+		sprite_init(&player[i], 31, 36, tpages[0]);
+		sprite_init(&bullet[i], 5, 1, tpages[1]);
+	}
+	reset_players();
 }
 
 void init_rods() {
@@ -335,17 +343,11 @@ int main() {
 				if(skill[0] == SHOCK && skill[1] != SHOCK)
 				{
 					skill[0] = 0; 
-					die[1] = 10;
-					player[1].hitted = 10;
-					onRod[1] = -1;
-					fall[1] = 0;
+					playerDie(&player[1], 1);
 				}
 				else if(skill[1] == SHOCK && skill[0] != SHOCK){
 					skill[1] = 0; 
-					die[0] = 10;
-					player[0].hitted = 10;
-					onRod[0] = -1;
-					fall[0] = 0;
+					playerDie(&player[0], 0);
 				}
 				else 
 				{
@@ -362,9 +364,9 @@ int main() {
 		for(i = 0; i < 2; i++)
 		{
 			int inv = (i+1)%2;
-			if(bullet[i].direction == 1 && bullet[i].pos.vx <= SCREEN_WIDTH)
+			if(bullet[i].direction == 1 && bullet[i].pos.vx <= SCREEN_WIDTH && bullet[i].pos.vx >= 0)
 				bullet[i].pos.vx += 4;
-			if(bullet[i].direction == 0 && bullet[i].pos.vx + bullet[i].w >= 0)
+			if(bullet[i].direction == 0 && bullet[i].pos.vx + bullet[i].w >= 0 && bullet[i].pos.vx <= SCREEN_WIDTH)
 				bullet[i].pos.vx -= 4;
 
 			if(bullet[i].pos.vx + bullet[i].w >= player[inv].pos.vx &&
@@ -396,7 +398,7 @@ int main() {
 
 			// PLAYER 1-2 INPUT
 			skills_action(&player[i], i);
-			if(player[i].action == 0 && player[i].hitted <= 0 && fall[i] == 0 && onRod[i] == -1) {
+			if(player[i].action == 0 && player[i].hitted <= 0 && fall[i] == 0 && onRod[i] == -1 && die[i] <= 0) {
 				if((pad[i] & PADLleft) == 0 && (pad[i] & PADLright) == 0)
 					sprite_set_uv(&player[i], 0, 46*1, 41, 46);
 					
@@ -444,7 +446,7 @@ int main() {
 		// 	DRAW
 		// =============== 
 
-		FntPrint("%d									%d", points[0], points[1]);
+		FntPrint("	%d							%d", points[0], points[1]);
 		for(i = 0; i < n_balls; i++){
 			if(balls[i].active == 1)
 				drawSprite_2d(&balls[i].sprite);
@@ -592,7 +594,7 @@ void disable_balls(){
 }
 
 void playerDie(Sprite *p, int i){
-	die[i] = 10;
+	die[i] = 50;
 	p->hitted = 10;
 	onRod[i] = -1;
 	fall[i] = 0;
@@ -600,7 +602,7 @@ void playerDie(Sprite *p, int i){
 
 void playerDead(int n){
 	init_map();
-	init_players();
+	reset_players();
 	// if p1 is dead, set points++ for p2, and vice versa
 	points[(n+1) % 2]++;
 	disable_balls();
