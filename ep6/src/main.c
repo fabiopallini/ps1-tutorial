@@ -2,7 +2,7 @@
 #include "rand.h"
 
 #define n_blocks 65 
-#define n_rods 4
+#define n_rods 6 
 #define SPEED 1 
 #define GRAVITY 2 
 #define JUMP_SPEED 8 
@@ -193,7 +193,7 @@ void init_players() {
 	int i;
 	for(i = 0; i <= 1; i++){
 		sprite_init(&player[i], 31, 36, tpages[0]);
-		player[i].direction = 1;
+		player[i].direction = (i+1)%2;
 		player[i].hitted = 0;
 		sprite_set_uv(&player[i], 41, 0, 41, 46);
 		player[i].pos.vy = blocks[block_index-1].sprt.y0-player[i].h-10;
@@ -222,9 +222,9 @@ void init_rods() {
 			if(k == 0)
 				setXY0(&rods[k][i].sprt, 50, (48*5)-16-(i*16));
 			if(k == 1)
-				setXY0(&rods[k][i].sprt, 110, (48*4)-16-(i*16));
-			if(k == 2)
 				setXY0(&rods[k][i].sprt, 240, (48*5)-16-(i*16));
+			if(k == 2)
+				setXY0(&rods[k][i].sprt, 110, (48*4)-16-(i*16));
 			if(k == 3)
 				setXY0(&rods[k][i].sprt, 200, (48*4)-16-(i*16));
 		}
@@ -255,8 +255,8 @@ int main() {
 	//rods_length[0] = 14;
 	//
 	rods_length[0] = 14;
-	rods_length[1] = 5;
-	rods_length[2] = 14;
+	rods_length[1] = 14;
+	rods_length[2] = 5;
 	rods_length[3] = 5;
 
 	init_map();
@@ -350,7 +350,7 @@ int main() {
 			if(bullet[i].pos.vx + bullet[i].w >= player[inv].pos.vx &&
 				bullet[i].pos.vx <= player[inv].pos.vx + player[inv].w &&
 				bullet[i].pos.vy + bullet[i].h >= player[inv].pos.vy &&
-				bullet[i].pos.vy <= player[inv].pos.vy + player[inv].h){
+				bullet[i].pos.vy <= player[inv].pos.vy + player[inv].h - 8){
 				playerDie(&player[inv], inv);
 				bullet[i].pos.vx = -100;
 			}
