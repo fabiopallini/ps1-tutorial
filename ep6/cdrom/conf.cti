@@ -52,6 +52,11 @@ Disc CDROMXA_PSX ;the disk format
 						Source [root]\data\PLAYER1.TIM
 					EndFile
 
+					File PLAYER2.TIM
+						XAFileAttributes Form1 Data
+						Source [root]\data\PLAYER2.TIM
+					EndFile
+
 					File GFX1.TIM
 						XAFileAttributes Form1 Data
 						Source [root]\data\GFX1.TIM

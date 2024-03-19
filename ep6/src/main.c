@@ -13,8 +13,8 @@
 #define BALL_SPAWN_TIME 100
 #define BALL_LIFE_TIME 600
 
-u_long *cd_data[3];
-u_short tpages[2];
+u_long *cd_data[4];
+u_short tpages[3];
 Sprite player[2];
 Sprite bullet[2];
 int points[2];
@@ -243,11 +243,10 @@ void reset_players(){
 }
 
 void init_players() {
-	int i;
-	for(i = 0; i <= 1; i++){
-		sprite_init(&player[i], 31, 36, tpages[0]);
-		sprite_init(&bullet[i], 5, 1, tpages[1]);
-	}
+	sprite_init(&player[0], 31, 36, tpages[0]);
+	sprite_init(&player[1], 31, 36, tpages[2]);
+	sprite_init(&bullet[0], 5, 1, tpages[1]);
+	sprite_init(&bullet[1], 5, 1, tpages[1]);
 	reset_players();
 }
 
@@ -271,10 +270,12 @@ int main() {
 	cd_read_file("PLAYER1.TIM", &cd_data[0]);
 	cd_read_file("GFX1.TIM", &cd_data[1]);
 	cd_read_file("LASER.VAG", &cd_data[2]);
+	cd_read_file("PLAYER2.TIM", &cd_data[3]);
 	cd_close();
 	
 	tpages[0] = loadToVRAM(cd_data[0]);
 	tpages[1] = loadToVRAM(cd_data[1]);
+	tpages[2] = loadToVRAM(cd_data[3]);
 	//free3(cd_data);
 
 	for(i = 0; i < n_balls; i++)
