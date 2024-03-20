@@ -399,7 +399,8 @@ int main() {
 
 			// PLAYER 1-2 INPUT
 			skills_action(&player[i], i);
-			if(player[i].action == 0 && player[i].hitted <= 0 && fall[i] == 0 && onRod[i] == -1 && die[i] <= 0) {
+			if(player[i].action == 0 && player[i].hitted <= 0 && fall[i] == 0 && onRod[i] == -1 &&
+			die[0] <= 0 && die[1] <= 0) {
 				if((pad[i] & PADLleft) == 0 && (pad[i] & PADLright) == 0)
 					sprite_set_uv(&player[i], 0, 46*1, 41, 46);
 					
@@ -595,7 +596,7 @@ void disable_balls(){
 }
 
 void playerDie(Sprite *p, int i){
-	die[i] = 50;
+	die[i] = 80;
 	p->hitted = 10;
 	onRod[i] = -1;
 	fall[i] = 0;
