@@ -10,8 +10,10 @@ void sprite_init(Sprite *sprite, int w, int h, u_short tpage){
 
 	SetPolyFT4(&sprite->poly);
 	setXY4(&sprite->poly, 0, 0, w, 0, 0, h, w, h);
-	setUV4(&sprite->poly, 0, 0, w, 0, 0, h, w, h);
-	SetShadeTex(&sprite->poly, 1);
+	//setUV4(&sprite->poly, 0, 0, w, 0, 0, h, w, h);
+	sprite_set_uv(sprite, 0, 0, w, h);
+	SetShadeTex(&sprite->poly, 1); // turn shading OFF
+	//sprite_setRGB(sprite, 255, 255, 255);
 	sprite_setRGB(sprite, 255, 255, 200);
 	sprite->tpage = tpage;
 
