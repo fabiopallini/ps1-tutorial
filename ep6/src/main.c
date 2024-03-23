@@ -265,7 +265,7 @@ void init_rods() {
 
 int main() {
 	int i = 0;
-	psSetup();
+	psInit();
 	cd_open();
 	cd_read_file("PLAYER1.TIM", &cd_data[0]);
 	cd_read_file("GFX1.TIM", &cd_data[1]);

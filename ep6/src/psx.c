@@ -1,7 +1,8 @@
 #include "psx.h"
 
-#define SOUND_MALLOC_MAX 3
+#define SOUND_MALLOC_MAX 3 
 #define OTSIZE 1024
+#define BILLBOARDS 0
 
 DISPENV	dispenv[2];
 DRAWENV	drawenv[2];
@@ -9,22 +10,103 @@ int dispid = 0;
 u_long ot[OTSIZE];
 u_short otIndex;
 
-void clearVRAM()
-{
-	RECT rectTL;
-	setRECT(&rectTL, 0, 0, 1024, 512);
-	ClearImage2(&rectTL, 0, 0, 0);
-	DrawSync(0);
+#define SUB_STACK 0x80180000 /* stack for sub-thread. update appropriately. */
+unsigned long sub_th,gp;
+static volatile unsigned long count1,count2; 
+struct ToT *sysToT = (struct ToT *) 0x100 ; /* Table of Tabbles  */
+struct TCBH *tcbh ; /* task status queue address */
+struct TCB *master_thp,*sub_thp; /* start address of thread context */
+
+static void billboard(Sprite *sprite) {
+	// sprite direction from camera pos
+	float dirX = camera.pos.vx - sprite->pos.vx;
+	//float dirY = camera.pos.vy - sprite->pos.vy;
+	float dirZ = camera.pos.vz - sprite->pos.vz;
+
+	// modify rotation based on camera rotation (Y axis)
+	float cosRY = cos(camera.rot.vy * (PI / 180.0));
+	float sinRY = sin(camera.rot.vy * (PI / 180.0));
+
+	//float tempX = dirX * cosRY + dirZ * sinRY;
+	//float tempZ = -dirX * sinRY + dirZ * cosRY;
+
+	// modify rotation based on camera rotation (X axis)
+	//float cosRX = cos(camera.rot.vx * (PI / 180.0));
+	//float sinRX = sin(camera.rot.vx * (PI / 180.0));
+	//float tempY = dirY * cosRX - tempZ * sinRX;
+
+	// rotation angle Y
+	sprite->rot.vy = atan2(dirX * cosRY + dirZ * sinRY, -dirX * sinRY + dirZ * cosRY) * (180.0 / PI);
+
+	// rotation angle X
+	//sprite->angX = atan2(tempY, sqrt(tempX * tempX + tempZ * tempZ)) * (180.0 / PI);
+
+	// sprite rotation angle based on camera rotation
+	sprite->rot.vy -= camera.rot.vy;
+	//sprite->angX -= camera.rot.vx;
+	//sprite->angZ = 0.0;
 }
 
-
-void psSetup()
+static void cbvsync(void)
 {
+	/* 
+	return from interrupt set to main thread. if this is not done, control will
+        return to sub thread (in sub_func()).  
+	*/
+	tcbh->entry = master_thp;
+}
+
+/*
+program to loop and count up during idle time.
+note that functions called from ChangeTh() will not have anywhere to return to.  
+*/
+static long sub_func()
+{
+	count1 = 0;
+	count2 = 0;
+	while(1){
+		SpriteNode *current = scene.spriteNode;
+		while (current != NULL) {
+			//printf("current-> %ld \n", current->data->pos.vx);
+			if(BILLBOARDS == 1)
+				billboard(current->data);
+			else
+				current->data->rot.vy = camera.rot.vy * -1;
+			current = current->next;
+		}
+		/* A Vsync interrupt is received somewhere in this while loop, and control is taken away.
+	        Control resumes from there at the next ChangeTh(). */
+		count2 ++;
+	}
+}
+
+static SpriteNode *createSprite(Sprite *data) {
+	SpriteNode* newNode = malloc3(sizeof(SpriteNode));
+	if (newNode == NULL) {
+		printf("error on SpriteNode malloc3 \n");
+		return NULL; 
+	}
+	newNode->data = data;
+	newNode->next = NULL;
+	return newNode;
+}
+
+void psInit()
+{
+	SetConf(16,4,0x80200000);
+	tcbh = (struct TCBH *) sysToT[1].head;
+	master_thp = tcbh->entry;
+	gp = GetGp();
+	EnterCriticalSection();
+	sub_th = OpenTh(sub_func, SUB_STACK, gp);
+	ExitCriticalSection();
+	sub_thp = (struct TCB *) sysToT[2].head + (sub_th & 0xffff);
+	sub_thp->reg[R_SR] = 0x404;
+
 	ResetCallback();
 	ResetGraph(0);
+	VSyncCallback(cbvsync);	
 	PadInit(0);
-	InitGeom();
-	clearVRAM();
 
 	#ifdef PAL
 		SetVideoMode(MODE_PAL);
@@ -60,7 +142,7 @@ void psSetup()
 	drawenv[1].isbg = 1;
 	setRGB0(&drawenv[1], 0,0,0);
 
-	// load the font from the BIOS into the framebuffer
+ 	// load the font from the BIOS into the framebuffer
 	FntLoad(960, 256);
 	// screen X,Y | max text length X,Y | autmatic background clear 0,1 | max characters
 	SetDumpFnt(FntOpen(5, 5, SCREEN_WIDTH, SCREEN_HEIGHT, 0, 512));
@@ -74,7 +156,8 @@ void psDisplay(){
 	opad[1] = pad[1];
 
 	DrawSync(0);
-	VSync(0);
+	ChangeTh(sub_th);
+	//VSync(0);
 
 	PutDispEnv(&dispenv[dispid]);
 	PutDrawEnv(&drawenv[dispid]);
@@ -82,6 +165,7 @@ void psDisplay(){
 	//DrawOTag(ot);
 	DrawOTag(ot+OTSIZE-1);
 
+	count1 = count2;
 	FntFlush(-1);
 	otIndex = 0;
 }
@@ -101,15 +185,17 @@ void psClear(){
 }
 
 void psExit(){
+	EnterCriticalSection();
+	CloseTh(sub_th);
+	ExitCriticalSection();
 	PadStop();
 	StopCallback();
 }
 
-void psGte(VECTOR pos, SVECTOR *rot)
-{
+void psGte(VECTOR pos, SVECTOR rot){
 	//0'-360' = 0-4096
 	MATRIX m;
-	RotMatrix(rot, &m);
+	RotMatrix(&rot, &m);
 	TransMatrix(&m, &pos);
 	CompMatrixLV(&camera.mtx, &m, &m);
 	SetRotMatrix(&m);
@@ -168,7 +254,7 @@ void cd_read_file(unsigned char* file_path, u_long** file) {
 		printf("...file buffer size needed: %d\n", *sectors_size);
 		printf("...sectors needed: %d\n", (*sectors_size + SECTOR - 1) / SECTOR);
 		*file = malloc3(*sectors_size + SECTOR);
-
+		
 		DsRead(&temp_file_info->pos, (*sectors_size + SECTOR - 1) / SECTOR, *file, DslModeSpeed);
 		while(DsReadSync(NULL));
 		printf("...file loaded!\n");
@@ -204,58 +290,6 @@ u_short loadToVRAM(u_long *image){
 	rect.h = tim.ch;
 	LoadImage(&rect, tim.clut);
 	return GetTPage(tim.pmode, 1, tim.px, tim.py);
-}
-
-void drawSprite(Sprite *sprite){
-	long otz;
-	setVector(&sprite->vector[0], -sprite->w, -sprite->h, 0);
-	setVector(&sprite->vector[1], sprite->w, -sprite->h, 0);
-	setVector(&sprite->vector[2], -sprite->w, sprite->h, 0);
-	setVector(&sprite->vector[3], sprite->w, sprite->h, 0);
-	psGte(sprite->pos, &sprite->rot);
-	sprite->poly.tpage = sprite->tpage;
-	RotTransPers(&sprite->vector[0], (long *)&sprite->poly.x0, 0, 0);
-	RotTransPers(&sprite->vector[1], (long *)&sprite->poly.x1, 0, 0);
-	RotTransPers(&sprite->vector[2], (long *)&sprite->poly.x2, 0, 0);
-	otz = RotTransPers(&sprite->vector[3], (long *)&sprite->poly.x3, 0, 0);
-	if(otz > 0 && otz < OTSIZE)
-		AddPrim(ot+otz, &sprite->poly);
-}
-
-static void moveSprite(Sprite *sprite, long x, long y){
-	sprite->poly.x0 = x;
-	sprite->poly.y0 = y;
-	sprite->poly.x1 = x + sprite->w;
-	sprite->poly.y1 = y;
-	sprite->poly.x2 = x;
-	sprite->poly.y2 = y + sprite->h;
-	sprite->poly.x3 = x + sprite->w;
-	sprite->poly.y3 = y + sprite->h;
-}
-
-void drawSprite_2d(Sprite *sprite){
-	moveSprite(sprite, sprite->pos.vx, sprite->pos.vy);
-	sprite->poly.tpage = sprite->tpage;
-	AddPrim(&ot[otIndex++], &sprite->poly);
-}
-
-void drawSprite_2d_rgb(Sprite *sprite){
-	long x = sprite->pos.vx;
-	long y = sprite->pos.vy;
-	sprite->poly_rgb.x0 = x;
-	sprite->poly_rgb.y0 = y;
-	sprite->poly_rgb.x1 = x + sprite->w;
-	sprite->poly_rgb.y1 = y;
-	sprite->poly_rgb.x2 = x;
-	sprite->poly_rgb.y2 = y + sprite->h;
-	sprite->poly_rgb.x3 = x + sprite->w;
-	sprite->poly_rgb.y3 = y + sprite->h;
-	AddPrim(&ot[otIndex++], &sprite->poly_rgb);
-}
-
-void drawSprt(DR_MODE *dr_mode, SPRT *sprt){
-	AddPrim(&ot[otIndex++], sprt);
-	AddPrim(&ot[otIndex++], dr_mode);
 }
 
 // AUDIO PLAYER
@@ -315,5 +349,89 @@ void audio_play(int voice_channel) {
 
 void audio_free(unsigned long spu_address) {
 	SpuFree(spu_address);
+}
+
+void drawSprite(Sprite *sprite){
+	long otz;
+	setVector(&sprite->vector[0], -sprite->w, -sprite->h, 0);
+	setVector(&sprite->vector[1], sprite->w, -sprite->h, 0);
+	setVector(&sprite->vector[2], -sprite->w, sprite->h, 0);
+	setVector(&sprite->vector[3], sprite->w, sprite->h, 0);
+	psGte(sprite->pos, sprite->rot);
+	sprite->poly.tpage = sprite->tpage;
+	RotTransPers(&sprite->vector[0], (long *)&sprite->poly.x0, 0, 0);
+	RotTransPers(&sprite->vector[1], (long *)&sprite->poly.x1, 0, 0);
+	RotTransPers(&sprite->vector[2], (long *)&sprite->poly.x2, 0, 0);
+	otz = RotTransPers(&sprite->vector[3], (long *)&sprite->poly.x3, 0, 0);
+	if(otz > 0 && otz < OTSIZE)
+		AddPrim(ot+otz, &sprite->poly);
+}
+
+static void moveSprite(Sprite *sprite, long x, long y){
+	sprite->poly.x0 = x;
+	sprite->poly.y0 = y;
+	sprite->poly.x1 = x + sprite->w;
+	sprite->poly.y1 = y;
+	sprite->poly.x2 = x;
+	sprite->poly.y2 = y + sprite->h;
+	sprite->poly.x3 = x + sprite->w;
+	sprite->poly.y3 = y + sprite->h;
+}
+
+void drawSprite_2d(Sprite *sprite){
+	moveSprite(sprite, sprite->pos.vx, sprite->pos.vy);
+	sprite->poly.tpage = sprite->tpage;
+	AddPrim(&ot[otIndex++], &sprite->poly);
+}
+
+void drawSprite_2d_rgb(Sprite *sprite){
+	long x = sprite->pos.vx;
+	long y = sprite->pos.vy;
+	sprite->poly_rgb.x0 = x;
+	sprite->poly_rgb.y0 = y;
+	sprite->poly_rgb.x1 = x + sprite->w;
+	sprite->poly_rgb.y1 = y;
+	sprite->poly_rgb.x2 = x;
+	sprite->poly_rgb.y2 = y + sprite->h;
+	sprite->poly_rgb.x3 = x + sprite->w;
+	sprite->poly_rgb.y3 = y + sprite->h;
+	AddPrim(&ot[otIndex++], &sprite->poly_rgb);
+}
+
+void drawSprt(DR_MODE *dr_mode, SPRT *sprt){
+	AddPrim(&ot[otIndex++], sprt);
+	AddPrim(&ot[otIndex++], dr_mode);
+}
+
+void scene_add_sprite(Sprite *data) {
+	SpriteNode *last;
+	SpriteNode **head = &scene.spriteNode;
+	SpriteNode *newNode = createSprite(data);
+	if (*head == NULL) {
+		*head = newNode;
+		return;
+	}
+	last = *head;
+	while (last->next != NULL) {
+		last = last->next;
+	}
+	last->next = newNode;
+}
+
+void printSpriteNode(SpriteNode *head) {
+	SpriteNode *current = head;
+	while (current != NULL) {
+		printf("SpriteNode->pos.vx %ld \n", current->data->pos.vx);
+		current = current->next;
+	}
+}
+
+void scene_freeSprites(){
+	SpriteNode *current = scene.spriteNode;
+	while (current != NULL) {
+		SpriteNode *nextNode = current->next;
+		free(current);
+		current = nextNode;
+	}
 }
 
