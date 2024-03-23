@@ -266,16 +266,25 @@ void init_rods() {
 int main() {
 	int i = 0;
 	psInit();
+
+	camera.pos.vx = 0;
+	camera.pos.vz = 2300;
+	camera.pos.vy = 900;
+	camera.rot.vx = 200;
+	camera.rot.vy = 0;
+	camera.rot.vz = 0;
+	camera.ox = 0;
+
 	cd_open();
 	cd_read_file("PLAYER1.TIM", &cd_data[0]);
 	cd_read_file("GFX1.TIM", &cd_data[1]);
-	cd_read_file("LASER.VAG", &cd_data[2]);
-	cd_read_file("PLAYER2.TIM", &cd_data[3]);
+	cd_read_file("PLAYER2.TIM", &cd_data[2]);
+	cd_read_file("LASER.VAG", &cd_data[3]);
 	cd_close();
 	
 	tpages[0] = loadToVRAM(cd_data[0]);
 	tpages[1] = loadToVRAM(cd_data[1]);
-	tpages[2] = loadToVRAM(cd_data[3]);
+	tpages[2] = loadToVRAM(cd_data[2]);
 	//free3(cd_data);
 
 	for(i = 0; i < n_balls; i++)
@@ -293,7 +302,7 @@ int main() {
 	init_rods();
 
 	audio_init();
-	audio_vag_to_spu((u_char*)cd_data[2], 27056, SPU_0CH);
+	audio_vag_to_spu((u_char*)cd_data[3], 27056, SPU_0CH);
 
 	while(1) {
 		int k = 0;
