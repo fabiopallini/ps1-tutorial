@@ -2,15 +2,28 @@
 # PlayStation 1 Psy-Q MAKEFILE
 # ----------------------------
 all:
-	ccpsx -O3 -Xo$80010000 -Wall psx.c sprite.c main.c -llibds -o main.cpe
+	ccpsx -O3 -Xo$80010000 -Wall main.c psx.c sprite.c -llibds -omain.cpe,main.sym,mem.map
 	cpe2x /ce main.cpe
 
-	del main.cpe
-
-	..\cdrom\buildcd.exe -l -i..\cdrom\temp.img ..\cdrom\conf.cti
+	..\cdrom\buildcd.exe -l -i..\cdrom\temp.img ..\cdrom\CONF.CTI
 	..\cdrom\stripiso.exe s 2352 ..\cdrom\temp.img ..\cdrom\game.iso
 
 	del CDW900E.TOC
 	del QSHEET.TOC
-	del main.exe
 	del ..\cdrom\TEMP.IMG 
+	
+	del mem.map
+	del main.sym
+	del main.exe
+	del main.cpe
+
+mkpsxiso:
+	ccpsx -O3 -Xo$80010000 -Wall *.c -llibds -omain.cpe,main.sym,mem.map
+	cpe2x /ce main.cpe
+
+	..\cdrom\mkpsxiso.exe -o ..\cdrom\game.iso -y cuesheet.xml
+
+   	del mem.map
+	del main.sym
+	del main.exe
+	del main.cpe

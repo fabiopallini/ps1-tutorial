@@ -1,6 +1,6 @@
 Define root C:\projects\tutorial\ep6
-Define LicensePath [root]\cdrom\
-Define LicenseFile licensee.dat
+Define LicensePath [root]\CDROM\
+Define LicenseFile LICENSEE.DAT 
 
 Disc CDROMXA_PSX ;the disk format
 
@@ -39,7 +39,7 @@ Disc CDROMXA_PSX ;the disk format
 
 					File SYSTEM.CNF
 						XAFileAttributes Form1 Data ;set the attribute to form 1
-						Source [root]\cdrom\system.cnf ;where the file above can be found
+						Source [root]\CDROM\SYSTEM.CNF ;where the file above can be found
 					EndFile
 
 					File MAIN.EXE 
