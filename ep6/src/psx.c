@@ -9,11 +9,22 @@ int dispid = 0;
 u_long ot[OTSIZE];
 u_short otIndex;
 
+void clearVRAM()
+{
+	RECT rectTL;
+	setRECT(&rectTL, 0, 0, 1024, 512);
+	ClearImage2(&rectTL, 0, 0, 0);
+	DrawSync(0);
+}
+
+
 void psSetup()
 {
 	ResetCallback();
 	ResetGraph(0);
 	PadInit(0);
+	InitGeom();
+	clearVRAM();
 
 	#ifdef PAL
 		SetVideoMode(MODE_PAL);

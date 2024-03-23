@@ -72,7 +72,7 @@ void init_block(BLOCK *b) {
 	b->sprt.v0 = 0;
 	b->sprt.w = 14; 
 	b->sprt.h = 7;
-	setRGB0(&b->sprt, 255, 255, 255);
+	setRGB0(&b->sprt, 255, 255, 200);
 }
 
 void init_map() {
@@ -215,7 +215,7 @@ void init_rod(ROD *r) {
 	r->sprt.v0 = 0;
 	r->sprt.w = 3; 
 	r->sprt.h = 16;
-	setRGB0(&r->sprt, 255, 255, 255);
+	setRGB0(&r->sprt, 255, 255, 200);
 }
 
 void reset_players(){
