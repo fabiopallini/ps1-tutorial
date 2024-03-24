@@ -8,7 +8,6 @@ DISPENV	dispenv[2];
 DRAWENV	drawenv[2];
 int dispid = 0;
 u_long ot[OTSIZE];
-u_short otIndex;
 
 #define SUB_STACK 0x80180000 /* stack for sub-thread. update appropriately. */
 unsigned long sub_th,gp;
@@ -168,7 +167,6 @@ void psDisplay(){
 
 	count1 = count2;
 	FntFlush(font_id);
-	otIndex = 0;
 }
 
 void psClear(){
@@ -382,7 +380,7 @@ static void moveSprite(Sprite *sprite, long x, long y){
 void drawSprite_2d(Sprite *sprite){
 	moveSprite(sprite, sprite->pos.vx, sprite->pos.vy);
 	sprite->poly.tpage = sprite->tpage;
-	AddPrim(&ot[otIndex++], &sprite->poly);
+	AddPrim(&ot[0], &sprite->poly);
 }
 
 void drawSprite_2d_rgb(Sprite *sprite){
@@ -396,12 +394,12 @@ void drawSprite_2d_rgb(Sprite *sprite){
 	sprite->poly_rgb.y2 = y + sprite->h;
 	sprite->poly_rgb.x3 = x + sprite->w;
 	sprite->poly_rgb.y3 = y + sprite->h;
-	AddPrim(&ot[otIndex++], &sprite->poly_rgb);
+	AddPrim(&ot[0], &sprite->poly_rgb);
 }
 
 void drawSprt(DR_MODE *dr_mode, SPRT *sprt){
-	AddPrim(&ot[otIndex++], sprt);
-	AddPrim(&ot[otIndex++], dr_mode);
+	AddPrim(&ot[0], sprt);
+	AddPrim(&ot[0], dr_mode);
 }
 
 void scene_add_sprite(Sprite *data) {
