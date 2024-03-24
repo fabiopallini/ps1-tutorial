@@ -457,7 +457,9 @@ int main() {
 		// 	DRAW
 		// =============== 
 
-		FntPrint("	%d							%d", points[0], points[1]);
+		//FntPrint(font_id, "	%d							%d", points[0], points[1]);
+		FntPrint(font_id, "ciao1"); 
+
 		for(i = 0; i < n_balls; i++){
 			if(balls[i].active == 1)
 				drawSprite_2d(&balls[i].sprite);
@@ -471,7 +473,7 @@ int main() {
 		for(k = 0; k < n_rods; k++){
 			for(i = 0; i < rods_length[k]; i++)
 			{
-				drawSprt(&rods[k][i].dr_mode, &rods[k][i].sprt);
+				//drawSprt(&rods[k][i].dr_mode, &rods[k][i].sprt);
 				// check rod collision
 				for(ii = 0; ii < 2; ii++){
 					if(player[ii].isJumping == 0 && (pad[ii] & PADLup || pad[ii] & PADLdown)){
@@ -488,8 +490,9 @@ int main() {
 			}
 		}
 
-		for(i = 0; i < block_index; i++)
+		/*for(i = 0; i < block_index; i++){
 			drawSprt(&blocks[i].dr_mode, &blocks[i].sprt);
+		}*/
 
 		psDisplay();
 	}

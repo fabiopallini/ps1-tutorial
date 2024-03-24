@@ -145,7 +145,8 @@ void psInit()
  	// load the font from the BIOS into the framebuffer
 	FntLoad(960, 256);
 	// screen X,Y | max text length X,Y | autmatic background clear 0,1 | max characters
-	SetDumpFnt(FntOpen(5, 5, SCREEN_WIDTH, SCREEN_HEIGHT, 0, 512));
+	font_id = FntOpen(5, 5, SCREEN_WIDTH, SCREEN_HEIGHT, 0, 512);
+	SetDumpFnt(font_id);
 
 	//init stack 16KB heap 2 megabyte
 	InitHeap3((void*)0x800F8000, 0x00200000);
@@ -166,7 +167,7 @@ void psDisplay(){
 	DrawOTag(ot+OTSIZE-1);
 
 	count1 = count2;
-	FntFlush(-1);
+	FntFlush(font_id);
 	otIndex = 0;
 }
 

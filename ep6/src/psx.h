@@ -61,6 +61,7 @@ typedef struct {
 
 Scene scene;
 u_long pad[2], opad[2];
+long font_id;
 
 void psInit();
 void psClear();
