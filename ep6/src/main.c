@@ -267,14 +267,6 @@ int main() {
 	int i = 0;
 	psInit();
 
-	camera.pos.vx = 0;
-	camera.pos.vz = 2300;
-	camera.pos.vy = 900;
-	camera.rot.vx = 200;
-	camera.rot.vy = 0;
-	camera.rot.vz = 0;
-	camera.ox = 0;
-
 	cd_open();
 	cd_read_file("PLAYER1.TIM", &cd_data[0]);
 	cd_read_file("GFX1.TIM", &cd_data[1]);
