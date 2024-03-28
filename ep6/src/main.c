@@ -367,16 +367,17 @@ int main() {
 
 		for(i = 0; i < 2; i++)
 		{
+			int m = 10;
 			int inv = (i+1)%2;
 			if(bullet[i].direction == 1 && bullet[i].pos.vx <= SCREEN_WIDTH && bullet[i].pos.vx >= 0)
-				bullet[i].pos.vx += 4;
+				bullet[i].pos.vx += 1;
 			if(bullet[i].direction == 0 && bullet[i].pos.vx + bullet[i].w >= 0 && bullet[i].pos.vx <= SCREEN_WIDTH)
-				bullet[i].pos.vx -= 4;
+				bullet[i].pos.vx -= 1;
 
-			if(bullet[i].pos.vx + bullet[i].w >= player[inv].pos.vx &&
-				bullet[i].pos.vx <= player[inv].pos.vx + player[inv].w &&
-				bullet[i].pos.vy + bullet[i].h >= player[inv].pos.vy &&
-				bullet[i].pos.vy <= player[inv].pos.vy + player[inv].h - 8){
+			if(bullet[i].pos.vx + bullet[i].w >= player[inv].pos.vx + m &&
+				bullet[i].pos.vx <= player[inv].pos.vx + player[inv].w - m &&
+				bullet[i].pos.vy + bullet[i].h >= player[inv].pos.vy + 3 &&
+				bullet[i].pos.vy <= player[inv].pos.vy + player[inv].h - 3){
 				playerDie(&player[inv], inv);
 				bullet[i].pos.vx = -100;
 			}
@@ -520,11 +521,11 @@ void gravity(Sprite *s, int n) {
 }
 
 int collision(Sprite s1, Sprite s2){
-	int m = 15;
+	int m = 10;
 	if(s1.pos.vx + s1.w > s2.pos.vx + m && 
 	s1.pos.vx < s2.pos.vx + s2.w - m &&
 	s1.pos.vy + s1.h > s2.pos.vy + m &&
-	s1.pos.vy < s2.pos.vy + s2.h)
+	s1.pos.vy < s2.pos.vy + s2.h - 5)
 		return 1;
 	return 0;
 }
