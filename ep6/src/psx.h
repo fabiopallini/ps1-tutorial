@@ -81,6 +81,7 @@ void audio_free(unsigned long spu_address);
 
 void drawSprite(Sprite *sprite);
 void drawSprite_2d(Sprite *sprite);
+void drawSprite_2d_ot(Sprite *sprite, int otz);
 void drawSprite_2d_rgb(Sprite *sprite);
 
 void drawSprt(DR_MODE *dr_mode, SPRT *sprt);

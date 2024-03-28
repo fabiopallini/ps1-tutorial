@@ -451,6 +451,8 @@ int main() {
 
 		FntPrint(font_id, "	%d							%d", points[0], points[1]);
 
+		drawSprite_2d_ot(&player[0], 1023);
+
 		for(k = 0; k < n_rods; k++){
 			for(i = 0; i < rods_length[k]; i++)
 			{
@@ -480,7 +482,6 @@ int main() {
 				drawSprite_2d(&balls[i].sprite);
 		}
 
-		drawSprite_2d(&player[0]);
 		drawSprite_2d(&player[1]);
 		drawSprite_2d(&bullet[0]);
 		drawSprite_2d(&bullet[1]);

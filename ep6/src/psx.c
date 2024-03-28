@@ -80,7 +80,7 @@ void psClear(){
 	pad[1] = pad[0] >> 16;
 
 	cdb = (cdb==db) ? db+1 : db;
-	ClearOTag(cdb->ot, 1024);     
+	ClearOTag(cdb->ot, OTSIZE);     
 	cdb->ot_index = 0;     
 
 	RotMatrix(&camera.rot, &camera.mtx);
@@ -297,6 +297,12 @@ void drawSprite_2d(Sprite *sprite){
 	sprite->poly.tpage = sprite->tpage;
 	AddPrim(cdb->ot+cdb->ot_index, &sprite->poly);
 	cdb->ot_index++;
+}
+
+void drawSprite_2d_ot(Sprite *sprite, int otz){
+	moveSprite(sprite, sprite->pos.vx, sprite->pos.vy);
+	sprite->poly.tpage = sprite->tpage;
+	AddPrim(cdb->ot+otz, &sprite->poly);
 }
 
 void drawSprite_2d_rgb(Sprite *sprite){
