@@ -25,6 +25,15 @@ static SpriteNode *createSprite(Sprite *data) {
 	return newNode;
 }
 
+void clearVRAM()
+{
+	RECT rectTL;
+	setRECT(&rectTL, 0, 0, 1024, 512);
+	ClearImage(&rectTL, 0, 0, 0);
+	DrawSync(0);
+	//while(DrawSync(1));
+}
+
 void psInit()
 {
 	ResetCallback();
@@ -58,6 +67,7 @@ void psInit()
 		db[1].disp.screen.h = 256;
 	#endif
 
+	clearVRAM();
 	SetDispMask(1);
 
 	db[0].draw.isbg = 1;
