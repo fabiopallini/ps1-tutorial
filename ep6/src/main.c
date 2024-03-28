@@ -370,9 +370,9 @@ int main() {
 			int m = 10;
 			int inv = (i+1)%2;
 			if(bullet[i].direction == 1 && bullet[i].pos.vx <= SCREEN_WIDTH && bullet[i].pos.vx >= 0)
-				bullet[i].pos.vx += 1;
+				bullet[i].pos.vx += 4;
 			if(bullet[i].direction == 0 && bullet[i].pos.vx + bullet[i].w >= 0 && bullet[i].pos.vx <= SCREEN_WIDTH)
-				bullet[i].pos.vx -= 1;
+				bullet[i].pos.vx -= 4;
 
 			if(bullet[i].pos.vx + bullet[i].w >= player[inv].pos.vx + m &&
 				bullet[i].pos.vx <= player[inv].pos.vx + player[inv].w - m &&
