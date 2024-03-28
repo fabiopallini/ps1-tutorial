@@ -451,16 +451,6 @@ int main() {
 
 		FntPrint(font_id, "	%d							%d", points[0], points[1]);
 
-		for(i = 0; i < n_balls; i++){
-			if(balls[i].active == 1)
-				drawSprite_2d(&balls[i].sprite);
-		}
-
-		drawSprite_2d(&player[0]);
-		drawSprite_2d(&player[1]);
-		drawSprite_2d(&bullet[0]);
-		drawSprite_2d(&bullet[1]);
-
 		for(k = 0; k < n_rods; k++){
 			for(i = 0; i < rods_length[k]; i++)
 			{
@@ -484,6 +474,16 @@ int main() {
 		for(i = 0; i < block_index; i++){
 			drawSprt(&blocks[i].dr_mode, &blocks[i].sprt);
 		}
+
+		for(i = 0; i < n_balls; i++){
+			if(balls[i].active == 1)
+				drawSprite_2d(&balls[i].sprite);
+		}
+
+		drawSprite_2d(&player[0]);
+		drawSprite_2d(&player[1]);
+		drawSprite_2d(&bullet[0]);
+		drawSprite_2d(&bullet[1]);
 
 		psDisplay();
 	}

@@ -1,83 +1,18 @@
 #include "psx.h"
 
 #define SOUND_MALLOC_MAX 3 
-#define OTSIZE 1024
+#define OTSIZE 1024 
 #define BILLBOARDS 0
 
-DISPENV	dispenv[2];
-DRAWENV	drawenv[2];
-int dispid = 0;
-u_long ot[OTSIZE];
-
-#define SUB_STACK 0x80180000 /* stack for sub-thread. update appropriately. */
-unsigned long sub_th,gp;
-static volatile unsigned long count1,count2; 
-struct ToT *sysToT = (struct ToT *) 0x100 ; /* Table of Tabbles  */
-struct TCBH *tcbh ; /* task status queue address */
-struct TCB *master_thp,*sub_thp; /* start address of thread context */
-
-static void billboard(Sprite *sprite) {
-	// sprite direction from camera pos
-	float dirX = camera.pos.vx - sprite->pos.vx;
-	//float dirY = camera.pos.vy - sprite->pos.vy;
-	float dirZ = camera.pos.vz - sprite->pos.vz;
-
-	// modify rotation based on camera rotation (Y axis)
-	float cosRY = cos(camera.rot.vy * (PI / 180.0));
-	float sinRY = sin(camera.rot.vy * (PI / 180.0));
-
-	//float tempX = dirX * cosRY + dirZ * sinRY;
-	//float tempZ = -dirX * sinRY + dirZ * cosRY;
-
-	// modify rotation based on camera rotation (X axis)
-	//float cosRX = cos(camera.rot.vx * (PI / 180.0));
-	//float sinRX = sin(camera.rot.vx * (PI / 180.0));
-	//float tempY = dirY * cosRX - tempZ * sinRX;
-
-	// rotation angle Y
-	sprite->rot.vy = atan2(dirX * cosRY + dirZ * sinRY, -dirX * sinRY + dirZ * cosRY) * (180.0 / PI);
-
-	// rotation angle X
-	//sprite->angX = atan2(tempY, sqrt(tempX * tempX + tempZ * tempZ)) * (180.0 / PI);
-
-	// sprite rotation angle based on camera rotation
-	sprite->rot.vy -= camera.rot.vy;
-	//sprite->angX -= camera.rot.vx;
-	//sprite->angZ = 0.0;
-}
-
-static void cbvsync(void)
-{
-	/* 
-	return from interrupt set to main thread. if this is not done, control will
-        return to sub thread (in sub_func()).  
-	*/
-	tcbh->entry = master_thp;
-}
-
-/*
-program to loop and count up during idle time.
-note that functions called from ChangeTh() will not have anywhere to return to.  
-*/
-static long sub_func()
-{
-	count1 = 0;
-	count2 = 0;
-	while(1){
-		SpriteNode *current = scene.spriteNode;
-		while (current != NULL) {
-			//printf("current-> %ld \n", current->data->pos.vx);
-			if(BILLBOARDS == 1)
-				billboard(current->data);
-			else
-				current->data->rot.vy = camera.rot.vy * -1;
-			current = current->next;
-		}
-		/* A Vsync interrupt is received somewhere in this while loop, and control is taken away.
-	        Control resumes from there at the next ChangeTh(). */
-		count2 ++;
-	}
-}
+typedef struct
+{                
+	DRAWENV draw;
+	DISPENV disp;
+	u_long ot[OTSIZE];
+	int ot_index;
+} DB;
+DB db[2];
+DB *cdb;
 
 static SpriteNode *createSprite(Sprite *data) {
 	SpriteNode* newNode = malloc3(sizeof(SpriteNode));
@@ -92,19 +27,8 @@ static SpriteNode *createSprite(Sprite *data) {
 
 void psInit()
 {
-	SetConf(16,4,0x80200000);
-	tcbh = (struct TCBH *) sysToT[1].head;
-	master_thp = tcbh->entry;
-	gp = GetGp();
-	EnterCriticalSection();
-	sub_th = OpenTh(sub_func, SUB_STACK, gp);
-	ExitCriticalSection();
-	sub_thp = (struct TCB *) sysToT[2].head + (sub_th & 0xffff);
-	sub_thp->reg[R_SR] = 0x404;
-
 	ResetCallback();
 	ResetGraph(0);
-	VSyncCallback(cbvsync);	
 	PadInit(0);
 
 	#ifdef PAL
@@ -117,29 +41,29 @@ void psInit()
 	SetGeomOffset(160, 120);
 	SetGeomScreen(512);
 
-	SetDefDrawEnv(&drawenv[0], 0, 0, SCREEN_WIDTH, SCREEN_HEIGHT);
-	SetDefDrawEnv(&drawenv[1], 0, SCREEN_HEIGHT, SCREEN_WIDTH, SCREEN_HEIGHT);
-	SetDefDispEnv(&dispenv[0], 0, SCREEN_HEIGHT,SCREEN_WIDTH, SCREEN_HEIGHT);
-	SetDefDispEnv(&dispenv[1], 0, 0, SCREEN_WIDTH, SCREEN_HEIGHT);
+	SetDefDrawEnv(&db[0].draw, 0, 0, SCREEN_WIDTH, SCREEN_HEIGHT);
+	SetDefDrawEnv(&db[1].draw, 0, SCREEN_HEIGHT, SCREEN_WIDTH, SCREEN_HEIGHT);
+	SetDefDispEnv(&db[0].disp, 0, SCREEN_HEIGHT,SCREEN_WIDTH, SCREEN_HEIGHT);
+	SetDefDispEnv(&db[1].disp, 0, 0, SCREEN_WIDTH, SCREEN_HEIGHT);
 
 	#ifdef PAL
-		dispenv[0].screen.x = 0;
-		dispenv[0].screen.y = 16;
-		dispenv[0].screen.w = 256;
-		dispenv[0].screen.h = 256;
+		db[0].disp.screen.x = 0;
+		db[0].disp.screen.y = 16;
+		db[0].disp.screen.w = 256;
+		db[0].disp.screen.h = 256;
 
-		dispenv[1].screen.x = 0;
-		dispenv[1].screen.y = 16;
-		dispenv[1].screen.w = 256;
-		dispenv[1].screen.h = 256;
+		db[1].disp.screen.x = 0;
+		db[1].disp.screen.y = 16;
+		db[1].disp.screen.w = 256;
+		db[1].disp.screen.h = 256;
 	#endif
 
 	SetDispMask(1);
 
-	drawenv[0].isbg = 1;
-	setRGB0(&drawenv[0], 0,0,0);
-	drawenv[1].isbg = 1;
-	setRGB0(&drawenv[1], 0,0,0);
+	db[0].draw.isbg = 1;
+	setRGB0(&db[0].draw, 0,0,0);
+	db[1].draw.isbg = 1;
+	setRGB0(&db[1].draw, 0,0,0);
 
  	// load the font from the BIOS into the framebuffer
 	FntLoad(960, 256);
@@ -151,30 +75,13 @@ void psInit()
 	InitHeap3((void*)0x800F8000, 0x00200000);
 }
 
-void psDisplay(){
-	opad[0] = pad[0];
-	opad[1] = pad[1];
-
-	DrawSync(0);
-	ChangeTh(sub_th);
-	//VSync(0);
-
-	PutDispEnv(&dispenv[dispid]);
-	PutDrawEnv(&drawenv[dispid]);
-
-	//DrawOTag(ot);
-	DrawOTag(ot+OTSIZE-1);
-
-	count1 = count2;
-	FntFlush(font_id);
-}
-
 void psClear(){
-	dispid = (dispid + 1) %2;
-	//ClearOTag(ot, OTSIZE);
-	ClearOTagR(ot, OTSIZE);
 	pad[0] = PadRead(0);
 	pad[1] = pad[0] >> 16;
+
+	cdb = (cdb==db) ? db+1 : db;
+	ClearOTag(cdb->ot, 1024);     
+	cdb->ot_index = 0;     
 
 	RotMatrix(&camera.rot, &camera.mtx);
 	ApplyMatrixLV(&camera.mtx, &camera.pos, &camera.tmp);	
@@ -183,10 +90,18 @@ void psClear(){
 	SetTransMatrix(&camera.mtx);
 }
 
+void psDisplay(){
+	opad[0] = pad[0];
+	opad[1] = pad[1];
+	FntFlush(font_id);
+	DrawSync(0);
+	VSync(0);
+	PutDrawEnv(&cdb->draw);
+	PutDispEnv(&cdb->disp);
+	DrawOTag(cdb->ot);
+}
+
 void psExit(){
-	EnterCriticalSection();
-	CloseTh(sub_th);
-	ExitCriticalSection();
 	PadStop();
 	StopCallback();
 }
@@ -363,7 +278,7 @@ void drawSprite(Sprite *sprite){
 	RotTransPers(&sprite->vector[2], (long *)&sprite->poly.x2, 0, 0);
 	otz = RotTransPers(&sprite->vector[3], (long *)&sprite->poly.x3, 0, 0);
 	if(otz > 0 && otz < OTSIZE)
-		AddPrim(ot+otz, &sprite->poly);
+		AddPrim(cdb->ot+otz, &sprite->poly);
 }
 
 static void moveSprite(Sprite *sprite, long x, long y){
@@ -380,7 +295,8 @@ static void moveSprite(Sprite *sprite, long x, long y){
 void drawSprite_2d(Sprite *sprite){
 	moveSprite(sprite, sprite->pos.vx, sprite->pos.vy);
 	sprite->poly.tpage = sprite->tpage;
-	AddPrim(&ot[0], &sprite->poly);
+	AddPrim(cdb->ot+cdb->ot_index, &sprite->poly);
+	cdb->ot_index++;
 }
 
 void drawSprite_2d_rgb(Sprite *sprite){
@@ -394,12 +310,14 @@ void drawSprite_2d_rgb(Sprite *sprite){
 	sprite->poly_rgb.y2 = y + sprite->h;
 	sprite->poly_rgb.x3 = x + sprite->w;
 	sprite->poly_rgb.y3 = y + sprite->h;
-	AddPrim(&ot[0], &sprite->poly_rgb);
+	AddPrim(cdb->ot+cdb->ot_index, &sprite->poly_rgb);
+	cdb->ot_index++;
 }
 
 void drawSprt(DR_MODE *dr_mode, SPRT *sprt){
-	AddPrim(&ot[0], sprt);
-	AddPrim(&ot[0], dr_mode);
+	AddPrim(cdb->ot+cdb->ot_index, sprt);
+	AddPrim(cdb->ot+cdb->ot_index, dr_mode);
+	cdb->ot_index++;
 }
 
 void scene_add_sprite(Sprite *data) {
