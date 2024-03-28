@@ -310,7 +310,7 @@ int main() {
 
 		for(i = 0; i < n_balls; i++)
 		{
-			if(balls[i].active == 1)
+			if(balls[i].active == 1 && die[0] <= 0 && die[1] <= 0)
 			{
 				balls[i].life_time -= 1;
 				if(balls[i].life_time > 0)
@@ -420,7 +420,7 @@ int main() {
 				if(player[i].pos.vx > SCREEN_WIDTH)	
 					player[i].pos.vx = 0;
 			}
-			if(onRod[i] >= 0) {
+			if(onRod[i] >= 0 && die[0] <= 0 && die[1] <= 0) {
 				sprite_set_uv(&player[i], 0, 46*3, 41, 46);
 
 				if(pad[i] & PADLup && player[i].pos.vy + player[i].h / 2 > rods[ onRod[i] ] [ rods_length[ onRod[i]]-1 ].sprt.y0)
@@ -528,7 +528,8 @@ int collision(Sprite s1, Sprite s2){
 }
 
 void jump(Sprite *player, int i){
-	if(player->isJumping == 0 && fall[i] == 0 && onRod[i] == -1 && (opad[i] & PADLsquare) == 0 && pad[i] & PADLsquare){
+	if(player->isJumping == 0 && fall[i] == 0 && onRod[i] == -1 && die[0] <= 0 && die[1] <= 0 &&
+		(opad[i] & PADLsquare) == 0 && pad[i] & PADLsquare){
 		player->isJumping = 1;
 		if(pad[i] & PADLleft)
 			player->isJumping = 2;
@@ -553,7 +554,7 @@ void jump(Sprite *player, int i){
 
 void skills_action(Sprite *player, int i){
 	if(player->action == 0 && (opad[i] & PADLcross) == 0 && pad[i] & PADLcross){
-		if(player->hitted <= 0 && fall[i] == 0 && onRod[i] == -1) {
+		if(player->hitted <= 0 && fall[i] == 0 && onRod[i] == -1 && die[0] <= 0 && die[1] <= 0) {
 			if(skill[i] == GUN){
 				audio_play(SPU_0CH);
 				player->action = skill[i];
