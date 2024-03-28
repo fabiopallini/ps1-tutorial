@@ -235,11 +235,13 @@ void reset_players(){
 	onRod[0] = -1;
 	fall[0] = 0;
 	skill[0] = 0;
+	die[0] = 0;
 
 	player[1].pos.vx = p2_start_vx; 
 	onRod[1] = -1;
 	fall[1] = 0;
 	skill[1] = 0;
+	die[1] = 0;
 }
 
 void init_players() {
@@ -513,7 +515,7 @@ void gravity(Sprite *s, int n) {
 		sprite_anim(s, 41, 46, 1, 1, 1);
 	}
 
-	if(s->pos.vy >= SCREEN_HEIGHT+100)
+	if(s->pos.vy >= SCREEN_HEIGHT+100 && die[n] <= 0)
 		playerDead(n);
 }
 
