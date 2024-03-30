@@ -259,7 +259,6 @@ void init_rods() {
 	int k, i;
 	for(k = 0; k < n_rods; k++){
 		for(i = 0; i < rods_length[k]; i++){
-			init_rod(&rods[k][i]);
 			if(k == 0)
 				setXY0(&rods[k][i].sprt, 50, (48*5)-16-(i*16));
 			if(k == 1)
@@ -270,6 +269,7 @@ void init_rods() {
 
 int main() {
 	int i = 0;
+	int k = 0;
 	psInit();
 
 	cd_open();
@@ -293,6 +293,14 @@ int main() {
 	rods_length[1] = 14;
 	rods_length[2] = 8;
 	rods_length[3] = 8;
+
+	for(i = 0; i < n_blocks; i++)
+		init_block(&blocks[i]);
+
+	for(i = 0; i < n_rods; i++){
+		for(k = 0; k < rods_length[i]; k++)
+			init_rod(&rods[i][k]);
+	}
 
 	init_map();
 	init_players();
@@ -473,8 +481,9 @@ int main() {
 		}
 		drawSprite_2d_ot(&player[1], 1023);
 
-		drawSprite_2d(&bullet[0]);
-		drawSprite_2d(&bullet[1]);
+		for(i = 0; i < block_index; i++){
+			drawSprt(&blocks[i].dr_mode, &blocks[i].sprt);
+		}
 
 		for(k = 0; k < n_rods; k++){
 			for(i = 0; i < rods_length[k]; i++)
@@ -496,14 +505,13 @@ int main() {
 			}
 		}
 
-		for(i = 0; i < block_index; i++){
-			drawSprt(&blocks[i].dr_mode, &blocks[i].sprt);
-		}
-
 		for(i = 0; i < n_balls; i++){
 			if(balls[i].active == 1)
 				drawSprite_2d(&balls[i].sprite);
 		}
+
+		drawSprite_2d(&bullet[0]);
+		drawSprite_2d(&bullet[1]);
 
 		psDisplay();
 	}
