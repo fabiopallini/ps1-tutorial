@@ -17,6 +17,7 @@ u_long *cd_data[4];
 u_short tpages[3];
 Sprite player[2];
 Sprite bullet[2];
+Sprite lightning[2];
 int points[2];
 char die[2];
 char fall[2];
@@ -249,6 +250,8 @@ void init_players() {
 	sprite_init(&player[1], 31, 36, tpages[2]);
 	sprite_init(&bullet[0], 5, 1, tpages[1]);
 	sprite_init(&bullet[1], 5, 1, tpages[1]);
+	sprite_init(&lightning[0], 31, 36, tpages[0]);
+	sprite_init(&lightning[1], 31, 36, tpages[0]);
 	reset_players();
 }
 
@@ -454,7 +457,24 @@ int main() {
 
 		FntPrint(font_id, "	%d							%d", points[0], points[1]);
 
+		if(skill[0] == SHOCK){
+			sprite_anim(&lightning[0], 41, 46, 4, 0, 6);
+			lightning[0].pos.vx = player[0].pos.vx;
+			lightning[0].pos.vy = player[0].pos.vy;
+			drawSprite_2d_ot(&lightning[0], 1023);
+		}
 		drawSprite_2d_ot(&player[0], 1023);
+
+		if(skill[1] == SHOCK){
+			sprite_anim(&lightning[1], 41, 46, 4, 0, 6);
+			lightning[1].pos.vx = player[1].pos.vx;
+			lightning[1].pos.vy = player[1].pos.vy;
+			drawSprite_2d_ot(&lightning[1], 1023);
+		}
+		drawSprite_2d_ot(&player[1], 1023);
+
+		drawSprite_2d(&bullet[0]);
+		drawSprite_2d(&bullet[1]);
 
 		for(k = 0; k < n_rods; k++){
 			for(i = 0; i < rods_length[k]; i++)
@@ -484,10 +504,6 @@ int main() {
 			if(balls[i].active == 1)
 				drawSprite_2d(&balls[i].sprite);
 		}
-
-		drawSprite_2d(&player[1]);
-		drawSprite_2d(&bullet[0]);
-		drawSprite_2d(&bullet[1]);
 
 		psDisplay();
 	}
