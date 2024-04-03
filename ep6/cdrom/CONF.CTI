@@ -1,4 +1,5 @@
 Define root C:\projects\tutorial\ep6
+;Define root Z:\tutorial\ep6
 Define LicensePath [root]\CDROM\
 Define LicenseFile LICENSEE.DAT 
 
