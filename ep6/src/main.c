@@ -26,6 +26,7 @@ u_char skill[2];
 int spawner_timer;
 int spawner_i;
 char firstStart = 1;
+u_long frames = 0;
 
 typedef enum {
 	GUN = 1,
@@ -187,7 +188,7 @@ void init_ball(BALL *ball){
 
 void ball_spawn(BALL *ball){
 	int r, pos;
-	srand(player[0].pos.vx + player[0].pos.vy + player[1].pos.vx + player[1].pos.vy);
+	srand(frames + player[0].pos.vx + player[0].pos.vy + player[1].pos.vx + player[1].pos.vy);
 	// The first skill is 1, so the random number must be at least 1 (random(..) + 1) 
 	r = random(2)+1;
 	pos = random(2);
@@ -513,6 +514,9 @@ int main() {
 		drawSprite_2d(&bullet[0]);
 		drawSprite_2d(&bullet[1]);
 
+		frames++;
+		if(frames >= 999000)
+			frames = 0;
 		psDisplay();
 	}
 
