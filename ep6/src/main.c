@@ -541,7 +541,8 @@ void gravity(Sprite *s, int n) {
 	//if(fall[n] == 1 && s->pos.vy < SCREEN_HEIGHT - s->h)
 	if(fall[n] == 1 && onRod[n] == -1){
 		s->pos.vy += GRAVITY;
-		sprite_anim(s, 41, 46, 1, 1, 1);
+		if(die[0] <= 0 && die[1] <= 0)
+			sprite_anim(s, 41, 46, 1, 1, 1);
 	}
 
 	if(s->pos.vy >= SCREEN_HEIGHT+100 && die[n] <= 0)
